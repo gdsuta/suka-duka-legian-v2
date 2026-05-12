@@ -1,6 +1,6 @@
 # 💰 Suka Duka Legian — Finance Web App
 
-A community finance management web application for **Suka Duka Legian**, a neighborhood mutual-aid community in Legian, Bali, Indonesia. This app tracks member dues, community income, and expenses — making financial data transparent and accessible to all 40 members.
+A community finance management web application for **Suka Duka Legian**, a neighborhood mutual-aid community at Perumahan Bali Erfina, Jalan Legian, Desa Bungkulan, Kecamatan Sawan, Kabupaten Buleleng, Bali, Indonesia. This app tracks member dues, community income, and expenses — making financial data transparent and accessible to all 40 members.
 
 Built entirely on free-tier services as a voluntary project.
 
@@ -263,7 +263,7 @@ This is a voluntary community project. If you'd like to contribute or report iss
 ## 👨‍💻 Developer
 
 **Gede Suta Pinatih**
-Voluntary community developer, Legian, Bali 🌴
+Voluntary community developer, Nusa Penida, Bali 🌴
 
 ---
 
