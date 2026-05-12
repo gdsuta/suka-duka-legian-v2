@@ -11,13 +11,12 @@ export const revalidate = 60;
 export default async function Dashboard() {
   const supabase = await createSupabaseServerClient();
 
-  // Cek sesi admin dari server (bukan localStorage)
   const {
     data: { session },
   } = await supabase.auth.getSession();
   const isAdmin = !!session;
 
-  // Semua query jalan paralel — lebih cepat 60-70% dibanding sequential
+  // Semua query jalan paralel
   const [
     { data: anggota, error: errorAnggota },
     { data: pemasukan, error: errorPemasukan },
@@ -34,7 +33,6 @@ export default async function Dashboard() {
       .order("tanggal", { ascending: true }),
   ]);
 
-  // Tangkap semua error dari ketiga query sekaligus
   const errors = [errorAnggota, errorPemasukan, errorPengeluaran].filter(
     Boolean
   );
@@ -60,6 +58,42 @@ export default async function Dashboard() {
   const totalPengeluaran =
     pengeluaran?.reduce((sum, item) => sum + Number(item.total_biaya), 0) || 0;
   const saldoKas = totalPemasukan - totalPengeluaran;
+
+  // Breakdown per sumber pemasukan
+  const breakdown = [
+    {
+      label: "Iuran Bulanan",
+      color: "bg-green-500",
+      total:
+        pemasukan
+          ?.filter((p) => p.kategori === "Iuran Bulanan")
+          .reduce((sum, p) => sum + Number(p.jumlah), 0) || 0,
+    },
+    {
+      label: "Sumbangan Wajib",
+      color: "bg-blue-500",
+      total:
+        pemasukan
+          ?.filter((p) => p.kategori === "Sumbangan Wajib")
+          .reduce((sum, p) => sum + Number(p.jumlah), 0) || 0,
+    },
+    {
+      label: "Denda Gotong-Royong",
+      color: "bg-orange-500",
+      total:
+        pemasukan
+          ?.filter((p) => p.kategori === "Denda Gotong-Royong")
+          .reduce((sum, p) => sum + Number(p.jumlah), 0) || 0,
+    },
+    {
+      label: "Donasi Sukarela",
+      color: "bg-purple-500",
+      total:
+        pemasukan
+          ?.filter((p) => p.kategori === "Donasi Sukarela")
+          .reduce((sum, p) => sum + Number(p.jumlah), 0) || 0,
+    },
+  ].filter((item) => item.total > 0); // hanya tampilkan kategori yang ada nilainya
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 text-black">
@@ -103,37 +137,63 @@ export default async function Dashboard() {
           <h2 className="text-xl font-semibold text-gray-600 mb-2">
             Sisa Saldo Kas Saat Ini
           </h2>
-          <p className="text-4xl md:text-5xl font-extrabold text-indigo-700 break-words">
+          <p className="text-4xl md:text-5xl font-extrabold text-indigo-700 wrap-break-word">
             Rp {saldoKas.toLocaleString("id-ID")}
           </p>
         </div>
 
         {/* 4. STATISTIK */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+
+          {/* Total Anggota */}
           <div className="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
             <h3 className="text-gray-500 text-sm font-semibold">
               Total Anggota
             </h3>
-            <p className="text-3xl font-bold text-gray-800">
+            <p className="text-3xl font-bold text-gray-800 mt-1">
               {anggota?.length || 0} / {JUMLAH_ANGGOTA_MAKSIMAL}
             </p>
           </div>
+
+          {/* Total Pemasukan + Breakdown */}
           <div className="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
             <h3 className="text-gray-500 text-sm font-semibold">
               Total Pemasukan
             </h3>
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-2xl font-bold text-green-600 mt-1">
               Rp {totalPemasukan.toLocaleString("id-ID")}
             </p>
+
+            {/* Breakdown per sumber */}
+            {breakdown.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-100 space-y-1.5">
+                {breakdown.map((item) => (
+                  <div key={item.label} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${item.color}`} />
+                      <span className="text-xs text-gray-500 truncate">
+                        {item.label}
+                      </span>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-700 shrink-0">
+                      Rp {item.total.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Total Pengeluaran */}
           <div className="bg-white p-6 rounded-lg shadow border-l-4 border-red-500">
             <h3 className="text-gray-500 text-sm font-semibold">
               Total Pengeluaran
             </h3>
-            <p className="text-2xl font-bold text-red-600">
+            <p className="text-2xl font-bold text-red-600 mt-1">
               Rp {totalPengeluaran.toLocaleString("id-ID")}
             </p>
           </div>
+
         </div>
 
         {/* 5. GRAFIK BULANAN */}
