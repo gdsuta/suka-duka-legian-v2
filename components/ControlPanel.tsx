@@ -67,6 +67,13 @@ export default function ControlPanel({
             >
               + Anggota
             </Link>
+            {/* NEW — Kelola Anggota */}
+            <Link
+              href="/admin/kelola-anggota"
+              className="bg-amber-500 text-white px-4 py-2 rounded-md hover:bg-amber-600 transition font-medium text-sm"
+            >
+              Kelola Anggota
+            </Link>
           </div>
 
           <div>
