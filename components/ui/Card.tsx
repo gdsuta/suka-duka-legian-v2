@@ -1,4 +1,5 @@
 import type { HTMLAttributes } from "react";
+import { cn } from "@/lib/cn";
 
 export default function Card({
   className = "",
@@ -6,7 +7,7 @@ export default function Card({
 }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`bg-surface border border-border rounded-lg card-shadow ${className}`}
+      className={cn("bg-surface border border-border rounded-lg card-shadow", className)}
       {...props}
     />
   );

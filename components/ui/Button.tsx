@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/cn";
 
 type Variant = "primary" | "danger" | "outline" | "secondary" | "ghost";
 type Size = "sm" | "md";
@@ -35,7 +36,7 @@ type AsLink = CommonProps & { href: string };
 
 export default function Button(props: AsButton | AsLink) {
   const { variant = "primary", size = "md", className = "", children } = props;
-  const classes = `${base} ${variants[variant]} ${sizes[size]} ${className}`;
+  const classes = cn(base, variants[variant], sizes[size], className);
 
   if ("href" in props && props.href) {
     return (

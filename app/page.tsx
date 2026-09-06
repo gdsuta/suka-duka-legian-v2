@@ -132,17 +132,7 @@ export default async function Dashboard() {
           </div>
         </Card>
 
-        {/* 3. SALDO KAS */}
-        <Card className="bg-brand border-brand-dark/40 p-6 sm:p-8 text-center overflow-hidden">
-          <h2 className="text-sm sm:text-base font-medium text-white/80 mb-2">
-            Sisa Saldo Kas Saat Ini
-          </h2>
-          <p className="font-heading font-semibold text-white text-[clamp(1.75rem,8vw,3rem)] leading-tight wrap-break-word">
-            Rp {saldoKas.toLocaleString("id-ID")}
-          </p>
-        </Card>
-
-        {/* 4. STATISTIK */}
+        {/* STATISTIK */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
 
           {/* Total Anggota */}
@@ -192,11 +182,18 @@ export default async function Dashboard() {
             <p className="text-xl sm:text-2xl font-semibold text-expense mt-1">
               Rp {totalPengeluaran.toLocaleString("id-ID")}
             </p>
+
+            <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-2">
+              <span className="text-xs text-ink-muted">Sisa Saldo Kas</span>
+              <span className="text-sm font-bold text-brand">
+                Rp {saldoKas.toLocaleString("id-ID")}
+              </span>
+            </div>
           </Card>
 
         </div>
 
-        {/* 5. GRAFIK BULANAN */}
+        {/* GRAFIK BULANAN */}
         <Card className="p-4 sm:p-6">
           <h2 className="font-heading text-lg sm:text-xl font-semibold text-ink mb-1">
             Grafik Arus Kas Bulanan
@@ -210,7 +207,7 @@ export default async function Dashboard() {
           />
         </Card>
 
-        {/* 6. TABEL DATA */}
+        {/* TABEL DATA */}
         <Card className="overflow-hidden">
           <div className="p-4 bg-surface-alt border-b border-border">
             <h2 className="font-heading text-lg sm:text-xl font-semibold text-ink">
