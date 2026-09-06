@@ -5,6 +5,10 @@ import { PemasukanSchema } from "@/lib/schemas";
 import { KATEGORI_PEMASUKAN } from "@/lib/config";
 import { toast } from "sonner";
 import Link from "next/link";
+import Card from "@/components/ui/Card";
+import Field, { inputClass } from "@/components/ui/Field";
+import Button from "@/components/ui/Button";
+import { ArrowLeftIcon } from "@/components/ui/icons";
 
 export default function CatatPemasukan() {
   const supabase = createSupabaseBrowserClient();
@@ -62,26 +66,23 @@ export default function CatatPemasukan() {
     kategori === "Iuran Bulanan" || kategori === "Denda Gotong-Royong";
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 text-black">
-      <div className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-1 text-gray-800">
+    <div className="min-h-screen p-3 sm:p-6 lg:p-8">
+      <Card className="max-w-xl mx-auto p-5 sm:p-6">
+        <h1 className="font-heading text-xl sm:text-2xl font-semibold text-ink mb-1">
           Catat Pemasukan Kas
         </h1>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-ink-muted mb-6">
           Semua field yang ditandai * wajib diisi.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Nama Anggota */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nama Anggota *
-            </label>
+          <Field label="Nama Anggota" htmlFor="anggota_id" required error={fieldErrors.anggota_id?.[0]}>
             <select
+              id="anggota_id"
               required
               value={anggotaId}
               onChange={(e) => setAnggotaId(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+              className={inputClass}
             >
               <option value="" disabled>
                 -- Pilih Anggota --
@@ -92,23 +93,15 @@ export default function CatatPemasukan() {
                 </option>
               ))}
             </select>
-            {fieldErrors.anggota_id && (
-              <p className="text-red-500 text-xs mt-1">
-                {fieldErrors.anggota_id[0]}
-              </p>
-            )}
-          </div>
+          </Field>
 
-          {/* Kategori */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kategori Pemasukan *
-            </label>
+          <Field label="Kategori Pemasukan" htmlFor="kategori" required>
             <select
+              id="kategori"
               required
               value={kategori}
               onChange={(e) => setKategori(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+              className={inputClass}
             >
               {KATEGORI_PEMASUKAN.map((k) => (
                 <option key={k} value={k}>
@@ -116,63 +109,51 @@ export default function CatatPemasukan() {
                 </option>
               ))}
             </select>
-          </div>
+          </Field>
 
-          {/* Jumlah */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Jumlah (Rp) *
-            </label>
+          <Field label="Jumlah (Rp)" htmlFor="jumlah" required error={fieldErrors.jumlah?.[0]}>
             <input
+              id="jumlah"
               type="number"
               required
               min="1"
               value={jumlah}
               onChange={(e) => setJumlah(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+              className={inputClass}
               placeholder="Contoh: 50000"
             />
-            {fieldErrors.jumlah && (
-              <p className="text-red-500 text-xs mt-1">
-                {fieldErrors.jumlah[0]}
-              </p>
-            )}
-          </div>
+          </Field>
 
-          {/* Periode Bulan — muncul untuk Iuran Bulanan & Denda */}
           {showPeriode && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Untuk Periode Bulan *
-              </label>
+            <Field
+              label="Untuk Periode Bulan"
+              htmlFor="periode"
+              required
+              hint="Pilih tanggal 1 pada bulan iuran tersebut."
+            >
               <input
+                id="periode"
                 type="date"
                 required
                 value={periode}
                 onChange={(e) => setPeriode(e.target.value)}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                className={inputClass}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Pilih tanggal 1 pada bulan iuran tersebut.
-              </p>
-            </div>
+            </Field>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-          >
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Menyimpan..." : "Simpan Pemasukan"}
-          </button>
+          </Button>
         </form>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="text-blue-500 hover:underline text-sm">
-            ← Kembali ke Dashboard
+          <Link href="/" className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-brand transition-colors">
+            <ArrowLeftIcon className="h-3.5 w-3.5" />
+            Kembali ke Dashboard
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

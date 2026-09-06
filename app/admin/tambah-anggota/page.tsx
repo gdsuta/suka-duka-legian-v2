@@ -4,6 +4,10 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { AnggotaSchema } from "@/lib/schemas";
 import { toast } from "sonner";
 import Link from "next/link";
+import Card from "@/components/ui/Card";
+import Field, { inputClass } from "@/components/ui/Field";
+import Button from "@/components/ui/Button";
+import { ArrowLeftIcon } from "@/components/ui/icons";
 
 export default function TambahAnggota() {
   const supabase = createSupabaseBrowserClient();
@@ -38,69 +42,52 @@ export default function TambahAnggota() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 text-black">
-      <div className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-1 text-gray-800">
+    <div className="min-h-screen p-3 sm:p-6 lg:p-8">
+      <Card className="max-w-xl mx-auto p-5 sm:p-6">
+        <h1 className="font-heading text-xl sm:text-2xl font-semibold text-ink mb-1">
           Tambah Anggota Baru
         </h1>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-ink-muted mb-6">
           Semua field yang ditandai * wajib diisi.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nama Lengkap *
-            </label>
+          <Field label="Nama Lengkap" htmlFor="nama" required error={fieldErrors.nama_lengkap?.[0]}>
             <input
+              id="nama"
               type="text"
               required
               value={nama}
               onChange={(e) => setNama(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className={inputClass}
               placeholder="Contoh: I Wayan Suka"
             />
-            {fieldErrors.nama_lengkap && (
-              <p className="text-red-500 text-xs mt-1">
-                {fieldErrors.nama_lengkap[0]}
-              </p>
-            )}
-          </div>
+          </Field>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Alamat Lengkap *
-            </label>
+          <Field label="Alamat Lengkap" htmlFor="alamat" required error={fieldErrors.alamat?.[0]}>
             <textarea
+              id="alamat"
               required
               value={alamat}
               onChange={(e) => setAlamat(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className={inputClass}
               placeholder="Contoh: Jl. Legian No. 10"
               rows={3}
             />
-            {fieldErrors.alamat && (
-              <p className="text-red-500 text-xs mt-1">
-                {fieldErrors.alamat[0]}
-              </p>
-            )}
-          </div>
+          </Field>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-          >
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Menyimpan..." : "Simpan Anggota"}
-          </button>
+          </Button>
         </form>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="text-blue-500 hover:underline text-sm">
-            ← Kembali ke Dashboard
+          <Link href="/" className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-brand transition-colors">
+            <ArrowLeftIcon className="h-3.5 w-3.5" />
+            Kembali ke Dashboard
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

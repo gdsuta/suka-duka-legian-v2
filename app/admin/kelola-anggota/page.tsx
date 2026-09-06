@@ -4,6 +4,10 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { AnggotaSchema } from "@/lib/schemas";
 import { toast } from "sonner";
 import Link from "next/link";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { inputClass } from "@/components/ui/Field";
+import { ArrowLeftIcon, PencilIcon, TrashIcon, WarningIcon } from "@/components/ui/icons";
 
 interface Anggota {
   id: string;
@@ -169,30 +173,31 @@ export default function KelolaAnggota() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 text-black">
+    <div className="min-h-screen p-3 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Kelola Anggota</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="font-heading text-xl sm:text-2xl font-semibold text-ink">Kelola Anggota</h1>
+            <p className="text-sm text-ink-muted mt-1">
               Edit atau hapus anggota yang keluar dari komunitas.
             </p>
           </div>
           <Link
             href="/"
-            className="text-blue-500 hover:underline text-sm font-medium self-start sm:self-auto"
+            className="inline-flex items-center gap-1 text-sm font-medium text-ink-muted hover:text-brand transition-colors self-start sm:self-auto"
           >
-            ← Kembali ke Dashboard
+            <ArrowLeftIcon className="h-3.5 w-3.5" />
+            Kembali ke Dashboard
           </Link>
         </div>
 
         {/* Stats bar */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 flex items-center gap-6">
+        <Card className="p-4 mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
           <div>
-            <p className="text-xs text-gray-500 font-medium">Total Anggota</p>
-            <p className="text-2xl font-bold text-gray-800">
+            <p className="text-xs text-ink-muted font-medium">Total Anggota</p>
+            <p className="text-2xl font-semibold text-ink">
               {anggotaList.length}
             </p>
           </div>
@@ -202,149 +207,204 @@ export default function KelolaAnggota() {
               placeholder="Cari nama atau alamat..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className={inputClass}
+              aria-label="Cari anggota"
             />
           </div>
-        </div>
+        </Card>
 
-        {/* Tabel */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        {/* Data */}
+        <Card className="overflow-hidden">
           {loading ? (
-            <div className="p-6 space-y-3">
+            <div className="p-4 sm:p-6 space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div
                   key={i}
-                  className="h-12 bg-gray-100 rounded animate-pulse"
+                  className="h-12 bg-surface-alt rounded animate-pulse"
                 />
               ))}
             </div>
           ) : filteredAnggota.length === 0 ? (
-            <div className="p-10 text-center text-gray-400">
+            <div className="p-10 text-center text-ink-faint">
               {searchQuery
                 ? `Tidak ada anggota yang cocok dengan "${searchQuery}".`
                 : "Belum ada data anggota."}
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="p-4 text-left font-semibold text-gray-600 w-8">
-                    No
-                  </th>
-                  <th className="p-4 text-left font-semibold text-gray-600">
-                    Nama Lengkap
-                  </th>
-                  <th className="p-4 text-left font-semibold text-gray-600">
-                    Alamat
-                  </th>
-                  <th className="p-4 text-center font-semibold text-gray-600 w-36">
-                    Aksi
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAnggota.map((anggota, index) => (
-                  <tr
-                    key={anggota.id}
-                    className={`border-b transition ${
-                      editingId === anggota.id
-                        ? "bg-indigo-50"
-                        : "hover:bg-gray-50"
-                    }`}
-                  >
-                    <td className="p-4 text-gray-500">{index + 1}</td>
+            <>
+              {/* Desktop table */}
+              <table className="w-full text-sm hidden sm:table">
+                <thead className="bg-surface-alt border-b border-border">
+                  <tr>
+                    <th className="p-4 text-left font-semibold text-ink-muted w-8">No</th>
+                    <th className="p-4 text-left font-semibold text-ink-muted">Nama Lengkap</th>
+                    <th className="p-4 text-left font-semibold text-ink-muted">Alamat</th>
+                    <th className="p-4 text-center font-semibold text-ink-muted w-40">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAnggota.map((anggota, index) => (
+                    <tr
+                      key={anggota.id}
+                      className={`border-b border-border transition-colors ${
+                        editingId === anggota.id ? "bg-brand-soft" : "hover:bg-surface-alt/60"
+                      }`}
+                    >
+                      <td className="p-4 text-ink-faint">{index + 1}</td>
 
+                      {editingId === anggota.id ? (
+                        <>
+                          <td className="p-3">
+                            <input
+                              type="text"
+                              value={editNama}
+                              onChange={(e) => setEditNama(e.target.value)}
+                              className={`${inputClass} min-h-9 py-1.5`}
+                              placeholder="Nama lengkap"
+                              autoFocus
+                              aria-label="Nama lengkap"
+                            />
+                            {fieldErrors.nama_lengkap && (
+                              <p className="text-expense text-xs mt-1">{fieldErrors.nama_lengkap[0]}</p>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            <input
+                              type="text"
+                              value={editAlamat}
+                              onChange={(e) => setEditAlamat(e.target.value)}
+                              className={`${inputClass} min-h-9 py-1.5`}
+                              placeholder="Alamat"
+                              aria-label="Alamat"
+                            />
+                            {fieldErrors.alamat && (
+                              <p className="text-expense text-xs mt-1">{fieldErrors.alamat[0]}</p>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            <div className="flex gap-2 justify-center">
+                              <Button size="sm" onClick={() => saveEdit(anggota.id)} disabled={saving}>
+                                {saving ? "..." : "Simpan"}
+                              </Button>
+                              <Button size="sm" variant="secondary" onClick={cancelEdit}>
+                                Batal
+                              </Button>
+                            </div>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="p-4 font-medium text-ink">{anggota.nama_lengkap}</td>
+                          <td className="p-4 text-ink-muted">
+                            {anggota.alamat || <span className="italic text-ink-faint">Tidak ada</span>}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex gap-2 justify-center">
+                              <button
+                                onClick={() => startEdit(anggota)}
+                                aria-label={`Edit ${anggota.nama_lengkap}`}
+                                className="inline-flex items-center gap-1 bg-gold-soft text-gold px-3 py-1.5 rounded text-xs font-semibold hover:bg-gold-soft/70 transition-colors"
+                              >
+                                <PencilIcon className="h-3.5 w-3.5" /> Edit
+                              </button>
+                              <button
+                                onClick={() => handleDelete(anggota)}
+                                aria-label={`Hapus ${anggota.nama_lengkap}`}
+                                className="inline-flex items-center gap-1 bg-expense-soft text-expense px-3 py-1.5 rounded text-xs font-semibold hover:bg-expense-soft/70 transition-colors"
+                              >
+                                <TrashIcon className="h-3.5 w-3.5" /> Hapus
+                              </button>
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Mobile card list */}
+              <ul className="sm:hidden divide-y divide-border">
+                {filteredAnggota.map((anggota) => (
+                  <li
+                    key={anggota.id}
+                    className={`p-4 ${editingId === anggota.id ? "bg-brand-soft" : ""}`}
+                  >
                     {editingId === anggota.id ? (
-                      // --- MODE EDIT (inline) ---
-                      <>
-                        <td className="p-3">
+                      <div className="space-y-2.5">
+                        <div>
                           <input
                             type="text"
                             value={editNama}
                             onChange={(e) => setEditNama(e.target.value)}
-                            className="w-full border border-indigo-300 rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className={inputClass}
                             placeholder="Nama lengkap"
                             autoFocus
+                            aria-label="Nama lengkap"
                           />
                           {fieldErrors.nama_lengkap && (
-                            <p className="text-red-500 text-xs mt-1">
-                              {fieldErrors.nama_lengkap[0]}
-                            </p>
+                            <p className="text-expense text-xs mt-1">{fieldErrors.nama_lengkap[0]}</p>
                           )}
-                        </td>
-                        <td className="p-3">
+                        </div>
+                        <div>
                           <input
                             type="text"
                             value={editAlamat}
                             onChange={(e) => setEditAlamat(e.target.value)}
-                            className="w-full border border-indigo-300 rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className={inputClass}
                             placeholder="Alamat"
+                            aria-label="Alamat"
                           />
                           {fieldErrors.alamat && (
-                            <p className="text-red-500 text-xs mt-1">
-                              {fieldErrors.alamat[0]}
-                            </p>
+                            <p className="text-expense text-xs mt-1">{fieldErrors.alamat[0]}</p>
                           )}
-                        </td>
-                        <td className="p-3">
-                          <div className="flex gap-2 justify-center">
-                            <button
-                              onClick={() => saveEdit(anggota.id)}
-                              disabled={saving}
-                              className="bg-indigo-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-indigo-700 transition disabled:opacity-60"
-                            >
-                              {saving ? "..." : "Simpan"}
-                            </button>
-                            <button
-                              onClick={cancelEdit}
-                              className="bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-xs font-bold hover:bg-gray-300 transition"
-                            >
-                              Batal
-                            </button>
-                          </div>
-                        </td>
-                      </>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => saveEdit(anggota.id)} disabled={saving} className="flex-1">
+                            {saving ? "..." : "Simpan"}
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={cancelEdit} className="flex-1">
+                            Batal
+                          </Button>
+                        </div>
+                      </div>
                     ) : (
-                      // --- MODE TAMPIL ---
-                      <>
-                        <td className="p-4 font-medium text-gray-800">
-                          {anggota.nama_lengkap}
-                        </td>
-                        <td className="p-4 text-gray-500">
-                          {anggota.alamat || (
-                            <span className="italic text-gray-300">
-                              Tidak ada
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-4">
-                          <div className="flex gap-2 justify-center">
-                            <button
-                              onClick={() => startEdit(anggota)}
-                              className="bg-amber-100 text-amber-700 px-3 py-1.5 rounded text-xs font-bold hover:bg-amber-200 transition"
-                            >
-                              ✏️ Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(anggota)}
-                              className="bg-red-100 text-red-600 px-3 py-1.5 rounded text-xs font-bold hover:bg-red-200 transition"
-                            >
-                              🗑️ Hapus
-                            </button>
-                          </div>
-                        </td>
-                      </>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-ink">{anggota.nama_lengkap}</p>
+                          <p className="text-sm text-ink-muted mt-0.5">
+                            {anggota.alamat || <span className="italic text-ink-faint">Tidak ada alamat</span>}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => startEdit(anggota)}
+                            aria-label={`Edit ${anggota.nama_lengkap}`}
+                            className="p-2.5 rounded-md bg-gold-soft text-gold"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(anggota)}
+                            aria-label={`Hapus ${anggota.nama_lengkap}`}
+                            className="p-2.5 rounded-md bg-expense-soft text-expense"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
                     )}
-                  </tr>
+                  </li>
                 ))}
-              </tbody>
-            </table>
+              </ul>
+            </>
           )}
-        </div>
+        </Card>
 
         {/* Info note */}
-        <p className="text-xs text-gray-400 mt-4 text-center">
-          ⚠️ Menghapus anggota yang memiliki riwayat pembayaran akan menghapus
+        <p className="flex items-center justify-center gap-1.5 text-xs text-ink-faint mt-4 text-center">
+          <WarningIcon className="h-3.5 w-3.5 shrink-0" />
+          Menghapus anggota yang memiliki riwayat pembayaran akan menghapus
           seluruh data transaksinya secara permanen.
         </p>
       </div>

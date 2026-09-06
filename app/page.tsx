@@ -3,6 +3,7 @@ import Image from "next/image";
 import ControlPanel from "@/components/ControlPanel";
 import DataTabs from "@/components/DataTabs";
 import GrafikBulanan from "@/components/GrafikBulanan";
+import Card from "@/components/ui/Card";
 import { JUMLAH_ANGGOTA_MAKSIMAL } from "@/lib/config";
 
 // Cache halaman selama 60 detik — otomatis di-reset setiap kali ada data baru
@@ -38,17 +39,17 @@ export default async function Dashboard() {
   );
   if (errors.length > 0) {
     return (
-      <div className="p-8 max-w-2xl mx-auto mt-16">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="font-bold text-red-700 text-lg mb-2">
+      <div className="p-6 max-w-2xl mx-auto mt-16">
+        <Card className="p-6 border-expense/30 bg-expense-soft">
+          <h2 className="font-heading font-semibold text-expense text-lg mb-2">
             Koneksi Database Gagal
           </h2>
-          <ul className="list-disc pl-4 text-red-600 text-sm space-y-1">
+          <ul className="list-disc pl-4 text-expense/90 text-sm space-y-1">
             {errors.map((e, i) => (
               <li key={i}>{e!.message}</li>
             ))}
           </ul>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -63,7 +64,7 @@ export default async function Dashboard() {
   const breakdown = [
     {
       label: "Iuran Bulanan",
-      color: "bg-green-500",
+      color: "bg-brand",
       total:
         pemasukan
           ?.filter((p) => p.kategori === "Iuran Bulanan")
@@ -71,7 +72,7 @@ export default async function Dashboard() {
     },
     {
       label: "Sumbangan Wajib",
-      color: "bg-blue-500",
+      color: "bg-gold",
       total:
         pemasukan
           ?.filter((p) => p.kategori === "Sumbangan Wajib")
@@ -79,7 +80,7 @@ export default async function Dashboard() {
     },
     {
       label: "Denda Gotong-Royong",
-      color: "bg-orange-500",
+      color: "bg-expense",
       total:
         pemasukan
           ?.filter((p) => p.kategori === "Denda Gotong-Royong")
@@ -87,7 +88,7 @@ export default async function Dashboard() {
     },
     {
       label: "Donasi Sukarela",
-      color: "bg-purple-500",
+      color: "bg-income",
       total:
         pemasukan
           ?.filter((p) => p.kategori === "Donasi Sukarela")
@@ -96,8 +97,8 @@ export default async function Dashboard() {
   ].filter((item) => item.total > 0); // hanya tampilkan kategori yang ada nilainya
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 text-black">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen p-3 sm:p-6 lg:p-8">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
 
         {/* 1. PANEL KONTROL */}
         <ControlPanel
@@ -111,8 +112,8 @@ export default async function Dashboard() {
         />
 
         {/* 2. HEADER */}
-        <div className="flex items-center gap-6 bg-white p-6 rounded-lg shadow-md mb-8">
-          <div className="w-24 h-24 shrink-0 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm relative">
+        <Card className="flex items-center gap-4 sm:gap-6 p-4 sm:p-6">
+          <div className="w-14 h-14 sm:w-20 sm:h-20 shrink-0 rounded-full bg-surface-alt flex items-center justify-center overflow-hidden border border-border relative">
             <Image
               src="/logo.png"
               alt="Logo Suka Duka Legian"
@@ -120,111 +121,108 @@ export default async function Dashboard() {
               className="object-cover relative z-10"
               priority
             />
-            <span className="text-gray-400 font-bold text-xs absolute z-0">
-              LOGO
-            </span>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
+          <div className="min-w-0">
+            <h1 className="font-heading text-xl sm:text-3xl font-semibold text-ink leading-tight">
               Keuangan Suka Duka Legian
             </h1>
-            <p className="text-gray-500 mt-1">Sistem Pencatatan Iuran dan Kas</p>
-          </div>
-        </div>
-
-        {/* 3. SALDO KAS */}
-        <div className="bg-white p-8 rounded-lg shadow-md mb-8 text-center border-t-4 border-indigo-500">
-          <h2 className="text-xl font-semibold text-gray-600 mb-2">
-            Sisa Saldo Kas Saat Ini
-          </h2>
-          <p className="text-4xl md:text-5xl font-extrabold text-indigo-700 wrap-break-word">
-            Rp {saldoKas.toLocaleString("id-ID")}
-          </p>
-        </div>
-
-        {/* 4. STATISTIK */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-
-          {/* Total Anggota */}
-          <div className="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
-            <h3 className="text-gray-500 text-sm font-semibold">
-              Total Anggota
-            </h3>
-            <p className="text-3xl font-bold text-gray-800 mt-1">
-              {anggota?.length || 0} / {JUMLAH_ANGGOTA_MAKSIMAL}
+            <p className="text-ink-muted mt-1 text-sm sm:text-base">
+              Sistem Pencatatan Iuran dan Kas Warga
             </p>
           </div>
+        </Card>
+
+        {/* 3. SALDO KAS */}
+        <Card className="bg-brand border-brand-dark/40 p-6 sm:p-8 text-center overflow-hidden">
+          <h2 className="text-sm sm:text-base font-medium text-white/80 mb-2">
+            Sisa Saldo Kas Saat Ini
+          </h2>
+          <p className="font-heading font-semibold text-white text-[clamp(1.75rem,8vw,3rem)] leading-tight wrap-break-word">
+            Rp {saldoKas.toLocaleString("id-ID")}
+          </p>
+        </Card>
+
+        {/* 4. STATISTIK */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+
+          {/* Total Anggota */}
+          <Card className="p-5 border-l-4 border-l-brand">
+            <h3 className="text-ink-muted text-xs font-semibold uppercase tracking-wide">
+              Total Anggota
+            </h3>
+            <p className="text-2xl sm:text-3xl font-semibold text-ink mt-1">
+              {anggota?.length || 0} / {JUMLAH_ANGGOTA_MAKSIMAL}
+            </p>
+          </Card>
 
           {/* Total Pemasukan + Breakdown */}
-          <div className="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
-            <h3 className="text-gray-500 text-sm font-semibold">
+          <Card className="p-5 border-l-4 border-l-income">
+            <h3 className="text-ink-muted text-xs font-semibold uppercase tracking-wide">
               Total Pemasukan
             </h3>
-            <p className="text-2xl font-bold text-green-600 mt-1">
+            <p className="text-xl sm:text-2xl font-semibold text-income mt-1">
               Rp {totalPemasukan.toLocaleString("id-ID")}
             </p>
 
             {/* Breakdown per sumber */}
             {breakdown.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-gray-100 space-y-1.5">
+              <div className="mt-3 pt-3 border-t border-border space-y-1.5">
                 {breakdown.map((item) => (
                   <div key={item.label} className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <span className={`w-2 h-2 rounded-full shrink-0 ${item.color}`} />
-                      <span className="text-xs text-gray-500 truncate">
+                      <span className="text-xs text-ink-muted truncate">
                         {item.label}
                       </span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-700 shrink-0">
+                    <span className="text-xs font-semibold text-ink shrink-0">
                       Rp {item.total.toLocaleString("id-ID")}
                     </span>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Total Pengeluaran */}
-          <div className="bg-white p-6 rounded-lg shadow border-l-4 border-red-500">
-            <h3 className="text-gray-500 text-sm font-semibold">
+          <Card className="p-5 border-l-4 border-l-expense">
+            <h3 className="text-ink-muted text-xs font-semibold uppercase tracking-wide">
               Total Pengeluaran
             </h3>
-            <p className="text-2xl font-bold text-red-600 mt-1">
+            <p className="text-xl sm:text-2xl font-semibold text-expense mt-1">
               Rp {totalPengeluaran.toLocaleString("id-ID")}
             </p>
-          </div>
+          </Card>
 
         </div>
 
         {/* 5. GRAFIK BULANAN */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-1">
+        <Card className="p-4 sm:p-6">
+          <h2 className="font-heading text-lg sm:text-xl font-semibold text-ink mb-1">
             Grafik Arus Kas Bulanan
           </h2>
-          <p className="text-gray-500 text-sm mb-4">
+          <p className="text-ink-muted text-sm mb-4">
             Perbandingan pemasukan dan pengeluaran per bulan
           </p>
           <GrafikBulanan
             pemasukan={pemasukan || []}
             pengeluaran={pengeluaran || []}
           />
-        </div>
+        </Card>
 
         {/* 6. TABEL DATA */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="p-4 bg-gray-50 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800">
+        <Card className="overflow-hidden">
+          <div className="p-4 bg-surface-alt border-b border-border">
+            <h2 className="font-heading text-lg sm:text-xl font-semibold text-ink">
               Data Informasi Keseluruhan
             </h2>
           </div>
-          <div className="overflow-x-auto">
-            <DataTabs
-              anggota={anggota || []}
-              pemasukan={pemasukan || []}
-              pengeluaran={pengeluaran || []}
-            />
-          </div>
-        </div>
+          <DataTabs
+            anggota={anggota || []}
+            pemasukan={pemasukan || []}
+            pengeluaran={pengeluaran || []}
+          />
+        </Card>
 
       </div>
     </div>

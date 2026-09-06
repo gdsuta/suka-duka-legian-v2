@@ -1,15 +1,29 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Fraunces, Public_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+const publicSans = Public_Sans({
+  subsets: ["latin"],
+  variable: "--font-public-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Suka Duka Legian Finance",
   description: "Sistem Pencatatan Iuran dan Kas Warga",
   manifest: "/manifest.json",
-  themeColor: "#4f46e5",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0e6b58",
 };
 
 export default function RootLayout({
@@ -18,16 +32,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
-      <body className={`${inter.className} flex flex-col min-h-screen bg-gray-50`}>
+    <html lang="id" className={`${fraunces.variable} ${publicSans.variable}`}>
+      <body className="flex flex-col min-h-screen bg-bg text-ink antialiased">
         <main className="flex-grow">{children}</main>
 
-        <footer className="w-full py-6 text-center bg-gray-100 border-t border-gray-200 mt-auto">
-          <p className="text-xs font-medium text-gray-500">
+        <footer className="w-full py-6 text-center bg-surface-alt border-t border-border mt-auto">
+          <p className="text-xs font-medium text-ink-muted">
             Developed by{" "}
-            <span className="font-bold text-gray-700">Gede Suta Pinatih</span>
+            <span className="font-semibold text-ink">Gede Suta Pinatih</span>
           </p>
-          <p className="text-[10px] text-gray-400 mt-1">
+          <p className="text-[10px] text-ink-faint mt-1">
             Suka Duka Legian Web App v2.0.0
           </p>
         </footer>

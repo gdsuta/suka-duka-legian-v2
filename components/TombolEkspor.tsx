@@ -1,6 +1,7 @@
 "use client";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Button from "@/components/ui/Button";
 
 export default function TombolEkspor({
   anggota,
@@ -39,7 +40,7 @@ export default function TombolEkspor({
       body: tableRows,
       startY: 48,
       theme: "grid",
-      headStyles: { fillColor: [220, 38, 38] },
+      headStyles: { fillColor: [177, 70, 31] },
     });
 
     const finalY = (doc as any).lastAutoTable.finalY || 48;
@@ -132,7 +133,7 @@ export default function TombolEkspor({
       body: tableRows,
       startY: 40,
       theme: "grid",
-      headStyles: { fillColor: [37, 99, 235] },
+      headStyles: { fillColor: [14, 107, 88] },
       didParseCell: function (data) {
         if (data.cell.raw === "Belum Bayar") {
           data.cell.styles.textColor = [220, 38, 38];
@@ -149,19 +150,12 @@ export default function TombolEkspor({
   };
 
   return (
-    <div className="flex gap-2">
-      <button
-        onClick={buatPDFRingkasan}
-        className="bg-gray-800 text-white px-3 py-2 rounded-md hover:bg-gray-900 transition font-medium text-sm border border-gray-700 shadow-sm"
-      >
+    <div className="flex gap-2 overflow-x-auto -mx-1 px-1">
+      <Button onClick={buatPDFRingkasan} variant="secondary" size="sm" className="shrink-0">
         Cetak Kas
-      </button>
-      <button
-        onClick={buatPDFDetail}
-        className="bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 transition font-medium text-sm shadow-sm flex items-center gap-2"
-      >
+      </Button>
+      <Button onClick={buatPDFDetail} variant="secondary" size="sm" className="shrink-0">
         <svg
-          xmlns="http://www.w3.org/2000/svg"
           className="h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
@@ -175,7 +169,7 @@ export default function TombolEkspor({
           />
         </svg>
         Cetak Detail (Landscape)
-      </button>
+      </Button>
     </div>
   );
 }

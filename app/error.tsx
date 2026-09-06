@@ -1,5 +1,9 @@
 "use client";
 
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { WarningIcon } from "@/components/ui/icons";
+
 export default function ErrorPage({
   error,
   reset,
@@ -8,25 +12,22 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center bg-white p-10 rounded-lg shadow-md max-w-md w-full mx-4">
-        <div className="text-5xl mb-4">⚠️</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="text-center p-8 sm:p-10 max-w-md w-full">
+        <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-expense-soft flex items-center justify-center">
+          <WarningIcon className="h-6 w-6 text-expense" />
+        </div>
+        <h2 className="font-heading text-xl font-semibold text-ink mb-2">
           Terjadi Kesalahan
         </h2>
-        <p className="text-gray-500 mb-6 text-sm">{error.message}</p>
-        <button
-          onClick={reset}
-          className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition font-medium"
-        >
-          Coba Lagi
-        </button>
+        <p className="text-ink-muted mb-6 text-sm">{error.message}</p>
+        <Button onClick={reset}>Coba Lagi</Button>
         <div className="mt-4">
-          <a href="/" className="text-blue-500 hover:underline text-sm">
+          <a href="/" className="text-sm text-ink-muted hover:text-brand transition-colors">
             ← Kembali ke Dashboard
           </a>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

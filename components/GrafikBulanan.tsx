@@ -65,31 +65,32 @@ export default function GrafikBulanan({
 
   if (data.length === 0) {
     return (
-      <div className="h-48 flex items-center justify-center text-gray-400 text-sm">
+      <div className="h-48 flex items-center justify-center text-ink-faint text-sm">
         Belum ada data transaksi untuk ditampilkan.
       </div>
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={260}>
       <BarChart
         data={data}
-        margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+        margin={{ top: 5, right: 4, left: 0, bottom: 5 }}
+        barCategoryGap="28%"
       >
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+        <CartesianGrid strokeDasharray="3 3" stroke="#e7ddc9" vertical={false} />
         <XAxis
           dataKey="bulan"
-          tick={{ fontSize: 12, fill: "#6b7280" }}
+          tick={{ fontSize: 12, fill: "#6d6353" }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
           tickFormatter={formatRupiah}
-          tick={{ fontSize: 11, fill: "#6b7280" }}
+          tick={{ fontSize: 11, fill: "#6d6353" }}
           axisLine={false}
           tickLine={false}
-          width={70}
+          width={64}
         />
         <Tooltip
           formatter={(value: number) =>
@@ -97,8 +98,9 @@ export default function GrafikBulanan({
           }
           contentStyle={{
             borderRadius: "8px",
-            border: "1px solid #e5e7eb",
+            border: "1px solid #e7ddc9",
             fontSize: "13px",
+            fontFamily: "var(--font-public-sans)",
           }}
         />
         <Legend
@@ -107,13 +109,13 @@ export default function GrafikBulanan({
         <Bar
           dataKey="pemasukan"
           name="Pemasukan"
-          fill="#4f46e5"
+          fill="#0e6b58"
           radius={[4, 4, 0, 0]}
         />
         <Bar
           dataKey="pengeluaran"
           name="Pengeluaran"
-          fill="#ef4444"
+          fill="#b1461f"
           radius={[4, 4, 0, 0]}
         />
       </BarChart>

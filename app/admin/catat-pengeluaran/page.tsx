@@ -4,6 +4,10 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PengeluaranSchema } from "@/lib/schemas";
 import { toast } from "sonner";
 import Link from "next/link";
+import Card from "@/components/ui/Card";
+import Field, { inputClass } from "@/components/ui/Field";
+import Button from "@/components/ui/Button";
+import { ArrowLeftIcon } from "@/components/ui/icons";
 
 export default function CatatPengeluaran() {
   const supabase = createSupabaseBrowserClient();
@@ -56,147 +60,107 @@ export default function CatatPengeluaran() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 text-black">
-      <div className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-1 text-gray-800">
+    <div className="min-h-screen p-3 sm:p-6 lg:p-8">
+      <Card className="max-w-xl mx-auto p-5 sm:p-6">
+        <h1 className="font-heading text-xl sm:text-2xl font-semibold text-ink mb-1">
           Catat Pengeluaran Kas
         </h1>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-ink-muted mb-6">
           Semua field yang ditandai * wajib diisi.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Nama Item */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nama Item / Keperluan *
-            </label>
+          <Field label="Nama Item / Keperluan" htmlFor="item_barang" required error={fieldErrors.item_barang?.[0]}>
             <input
+              id="item_barang"
               type="text"
               required
               value={itemBarang}
               onChange={(e) => setItemBarang(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+              className={inputClass}
               placeholder="Contoh: Beli Lampu Jalan"
             />
-            {fieldErrors.item_barang && (
-              <p className="text-red-500 text-xs mt-1">
-                {fieldErrors.item_barang[0]}
-              </p>
-            )}
-          </div>
+          </Field>
 
-          {/* Tanggal & Vendor */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Tanggal Beli *
-              </label>
+            <Field label="Tanggal Beli" htmlFor="tanggal" required error={fieldErrors.tanggal?.[0]}>
               <input
+                id="tanggal"
                 type="date"
                 required
                 value={tanggal}
                 onChange={(e) => setTanggal(e.target.value)}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                className={inputClass}
               />
-              {fieldErrors.tanggal && (
-                <p className="text-red-500 text-xs mt-1">
-                  {fieldErrors.tanggal[0]}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Toko / Vendor
-              </label>
+            </Field>
+            <Field label="Toko / Vendor" htmlFor="vendor">
               <input
+                id="vendor"
                 type="text"
                 value={vendor}
                 onChange={(e) => setVendor(e.target.value)}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                className={inputClass}
                 placeholder="Contoh: Toko Bangunan Jaya"
               />
-            </div>
+            </Field>
           </div>
 
-          {/* Harga Satuan & Volume */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Harga Satuan (Rp) *
-              </label>
+            <Field label="Harga Satuan (Rp)" htmlFor="harga_satuan" required error={fieldErrors.harga_satuan?.[0]}>
               <input
+                id="harga_satuan"
                 type="number"
                 required
                 min="1"
                 value={hargaSatuan}
                 onChange={(e) => setHargaSatuan(e.target.value)}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                className={inputClass}
                 placeholder="0"
               />
-              {fieldErrors.harga_satuan && (
-                <p className="text-red-500 text-xs mt-1">
-                  {fieldErrors.harga_satuan[0]}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Volume / Jumlah *
-              </label>
+            </Field>
+            <Field label="Volume / Jumlah" htmlFor="volume" required>
               <input
+                id="volume"
                 type="number"
                 required
                 min="1"
                 value={volume}
                 onChange={(e) => setVolume(e.target.value)}
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                className={inputClass}
               />
-            </div>
+            </Field>
           </div>
 
-          {/* Total otomatis */}
-          <div className="bg-red-50 p-4 rounded-md border border-red-100">
-            <p className="text-sm text-red-800 font-semibold">
+          <div className="bg-expense-soft p-4 rounded-md border border-expense/20">
+            <p className="text-sm text-expense font-semibold">
               Total Biaya: Rp {totalBiaya.toLocaleString("id-ID")}
             </p>
           </div>
 
-          {/* Pembeli */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nama Pembeli / Penanggung Jawab *
-            </label>
+          <Field label="Nama Pembeli / Penanggung Jawab" htmlFor="pembeli" required error={fieldErrors.pembeli?.[0]}>
             <input
+              id="pembeli"
               type="text"
               required
               value={pembeli}
               onChange={(e) => setPembeli(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+              className={inputClass}
               placeholder="Contoh: Pak RT"
             />
-            {fieldErrors.pembeli && (
-              <p className="text-red-500 text-xs mt-1">
-                {fieldErrors.pembeli[0]}
-              </p>
-            )}
-          </div>
+          </Field>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-          >
+          <Button type="submit" variant="danger" disabled={loading} className="w-full">
             {loading ? "Menyimpan..." : "Simpan Pengeluaran"}
-          </button>
+          </Button>
         </form>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="text-blue-500 hover:underline text-sm">
-            ← Kembali ke Dashboard
+          <Link href="/" className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-brand transition-colors">
+            <ArrowLeftIcon className="h-3.5 w-3.5" />
+            Kembali ke Dashboard
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

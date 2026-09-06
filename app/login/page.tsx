@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import Card from "@/components/ui/Card";
+import Field, { inputClass } from "@/components/ui/Field";
+import Button from "@/components/ui/Button";
+import { MailIcon, ArrowLeftIcon } from "@/components/ui/icons";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -33,74 +37,79 @@ export default function LoginPage() {
 
   if (sent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-md w-96 text-center">
-          <div className="text-5xl mb-4">📧</div>
-          <h1 className="text-xl font-bold text-gray-800 mb-2">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="p-8 w-full max-w-sm text-center">
+          <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-brand-soft flex items-center justify-center">
+            <MailIcon className="h-6 w-6 text-brand" />
+          </div>
+          <h1 className="font-heading text-xl font-semibold text-ink mb-2">
             Cek Email Anda
           </h1>
-          <p className="text-gray-500 text-sm">
+          <p className="text-ink-muted text-sm">
             Link masuk telah dikirim ke{" "}
-            <span className="font-semibold text-gray-700">{email}</span>.
-            Klik link tersebut untuk masuk sebagai admin.
+            <span className="font-semibold text-ink">{email}</span>. Klik
+            link tersebut untuk masuk sebagai admin.
           </p>
           <button
-            onClick={() => { setSent(false); setEmail(""); }}
-            className="mt-6 text-sm text-blue-500 hover:underline"
+            onClick={() => {
+              setSent(false);
+              setEmail("");
+            }}
+            className="mt-6 text-sm text-brand hover:underline font-medium"
           >
             Kirim ulang dengan email berbeda
           </button>
-        </div>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="p-8 w-full max-w-sm">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Admin Login</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="font-heading text-2xl font-semibold text-ink">
+            Admin Login
+          </h1>
+          <p className="text-sm text-ink-muted mt-1">
             Masukkan email admin untuk menerima link masuk
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Admin
-            </label>
+          <Field label="Email Admin" htmlFor="email" required>
             <input
+              id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@sukaduka.id"
-              className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className={inputClass}
             />
-          </div>
+          </Field>
 
           {error && (
-            <p className="text-red-600 text-sm bg-red-50 p-3 rounded-md">
+            <p className="text-expense text-sm bg-expense-soft p-3 rounded-md">
               {error}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition font-medium disabled:opacity-60 disabled:cursor-not-allowed"
-          >
+          <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Mengirim..." : "Kirim Link Masuk"}
-          </button>
+          </Button>
         </form>
 
         <div className="mt-6 text-center">
-          <a href="/" className="text-sm text-blue-500 hover:underline">
-            ← Kembali ke Dashboard
+          <a
+            href="/"
+            className="inline-flex items-center gap-1 text-sm text-ink-muted hover:text-brand transition-colors"
+          >
+            <ArrowLeftIcon className="h-3.5 w-3.5" />
+            Kembali ke Dashboard
           </a>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
