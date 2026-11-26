@@ -1,47 +1,145 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens — Suka Duka Legian
+ * Gaya: Swiss minimal / financial dashboard. Netral dingin yang bersih,
+ * aksen jade dari logo komunitas. Semua pasangan teks/latar ≥ 4.5:1.
+ */
 @theme {
-  --font-heading: var(--font-fraunces);
-  --font-sans: var(--font-public-sans);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 
-  /* Warm, paper-toned neutrals instead of stock gray */
-  --color-bg: #faf8f3;
+  /* Skala tipografi (16px dasar) */
+  --text-2xs: 0.75rem;     /* 12px — label mikro, minimum */
+  --text-2xs--line-height: 1rem;
+
+  /* Netral */
+  --color-bg: #f5f7f9;
   --color-surface: #ffffff;
-  --color-surface-alt: #f4efe1;
-  --color-border: #e7ddc9;
-  --color-border-strong: #d5c7a3;
+  --color-surface-alt: #f1f4f7;
+  --color-border: #e3e8ee;
+  --color-border-strong: #cdd5df;
 
-  --color-ink: #241f18;
-  --color-ink-muted: #6d6353;
-  --color-ink-faint: #a39a86;
+  --color-ink: #0f1a24;
+  --color-ink-muted: #475569;
+  --color-ink-faint: #64748b;
 
-  /* Brand: deep jade — reads as "trust / kas", not another indigo SaaS app */
+  /* Brand: jade */
   --color-brand: #0e6b58;
-  --color-brand-dark: #0a5445;
-  --color-brand-soft: #e3efe9;
+  --color-brand-dark: #0a5446;
+  --color-brand-deep: #073d33;
+  --color-brand-soft: #e6f3ef;
 
-  --color-income: #3f7d3a;
-  --color-income-soft: #eaf3e5;
+  /* Semantik keuangan */
+  --color-income: #047857;
+  --color-income-soft: #ebf8f2;
+  --color-expense: #b42318;
+  --color-expense-soft: #fef1f0;
+  --color-gold: #a15c07;
+  --color-gold-soft: #fff7e6;
+  --color-sky: #0369a1;
+  --color-sky-soft: #eef7fd;
+  --color-violet: #6d28d9;
+  --color-violet-soft: #f4f0fe;
 
-  --color-expense: #b1461f;
-  --color-expense-soft: #f9e9e0;
+  --radius-card: 1rem;
 
-  --color-gold: #ab7c25;
-  --color-gold-soft: #f5ecd7;
+  --shadow-card: 0 1px 2px rgb(15 26 36 / 0.04), 0 1px 3px rgb(15 26 36 / 0.04);
+  --shadow-raised: 0 1px 2px rgb(15 26 36 / 0.05), 0 8px 24px -8px rgb(15 26 36 / 0.12);
+
+  --animate-fade-in: fade-in 220ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-ink);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.font-heading {
-  font-family: var(--font-heading), ui-serif, Georgia, serif;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary,
+  select {
+    cursor: pointer;
+  }
+
+  /* Hilangkan panah spinner pada input angka */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }
 
-.card-shadow {
-  box-shadow:
-    0 1px 2px rgba(36, 31, 24, 0.04),
-    0 6px 20px -10px rgba(36, 31, 24, 0.14);
+/* Angka keuangan: lebar digit seragam agar kolom rapi */
+@utility num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Panah dropdown untuk <select> berbasis appearance-none */
+@utility select-chevron {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  background-size: 1.125rem;
+}
+
+/* Scroll horizontal tanpa scrollbar (tab, chip) */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

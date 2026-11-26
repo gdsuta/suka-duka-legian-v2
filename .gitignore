@@ -2,4 +2,18 @@ node_modules
 .next
 .env.local
 .env.*
+!.env.example
 .vercel
+
+# Salinan data warga dari Supabase — berisi nama & alamat, jangan di-commit
+db/backup/
+
+# Artefak PWA hasil build
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+public/swe-worker-*.js
+
+# Cache TypeScript
+*.tsbuildinfo

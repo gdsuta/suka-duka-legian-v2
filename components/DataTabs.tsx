@@ -1,266 +1,328 @@
 "use client";
-import { useState } from "react";
+import { useDeferredValue, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { Inbox, Search, X } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
+import { inputClass } from "@/components/ui/Field";
+import { formatPeriode, formatRupiah, formatTanggal } from "@/lib/format";
+import type { Anggota, PemasukanDenganNama, Pengeluaran } from "@/lib/types";
+import { cn } from "@/lib/cn";
 
-type Tone = "income" | "expense" | "muted";
+type Align = "left" | "right";
 
-interface Cell {
+interface Column<T> {
+  header: string;
+  cell: (row: T) => React.ReactNode;
+  align?: Align;
+  className?: string;
+  /** Tampil sebagai baris utama di kartu mobile */
+  primary?: boolean;
+}
+
+interface TabDef<T> {
+  key: string;
   label: string;
-  value: React.ReactNode;
-  tone?: Tone;
+  rows: T[];
+  columns: Column<T>[];
+  search: (row: T) => string;
+  total?: (rows: T[]) => number;
+  totalTone?: "income" | "expense";
+  empty: string;
 }
 
-interface Row {
-  id: string;
-  cells: Cell[];
+const HALAMAN = 25;
+
+function Nominal({ value, tone }: { value: number; tone: "income" | "expense" }) {
+  return (
+    <span className={cn("num font-semibold", tone === "income" ? "text-income" : "text-expense")}>
+      {formatRupiah(value)}
+    </span>
+  );
 }
 
-const toneClass: Record<Tone, string> = {
-  income: "text-income font-semibold",
-  expense: "text-expense font-semibold",
-  muted: "text-ink-muted",
-};
-
-function formatRupiah(n: number) {
-  return `Rp ${Number(n).toLocaleString("id-ID")}`;
-}
-
-function formatTanggal(value: string | null | undefined) {
-  if (!value) return "-";
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return value;
-  return d.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-export default function DataTabs({ anggota, pemasukan, pengeluaran }: any) {
-  const [activeTab, setActiveTab] = useState("warga");
-
-  const getNamaWarga = (id: string) => {
-    const orang = anggota.find((a: any) => a.id === id);
-    return orang ? orang.nama_lengkap : "Tidak diketahui";
-  };
-
-  const byKategori = (kategori: string) =>
-    pemasukan
-      .filter((p: any) => p.kategori === kategori)
-      .sort(
-        (a: any, b: any) =>
-          new Date(b.tanggal_bayar).getTime() -
-          new Date(a.tanggal_bayar).getTime()
-      );
-
-  const iuranBulanan = byKategori("Iuran Bulanan");
-  const denda = byKategori("Denda Gotong-Royong");
-  const sumbanganWajib = byKategori("Sumbangan Wajib");
-  const donasiSukarela = byKategori("Donasi Sukarela");
-  const totalDonasiSukarela = donasiSukarela.reduce(
-    (sum: number, p: any) => sum + Number(p.jumlah),
-    0
+function pemasukanTab(
+  key: string,
+  label: string,
+  rows: PemasukanDenganNama[],
+  periode: "bulan" | "tanggal" | null
+): TabDef<PemasukanDenganNama> {
+  const columns: Column<PemasukanDenganNama>[] = [
+    { header: "Nama Warga", cell: (r) => r.nama_anggota ?? "Tidak diketahui", primary: true, className: "font-medium text-ink" },
+  ];
+  if (periode) {
+    columns.push({
+      header: periode === "bulan" ? "Periode" : "Tgl. Gotong-Royong",
+      cell: (r) => (periode === "bulan" ? formatPeriode(r.periode_bulan) : formatTanggal(r.periode_bulan)),
+      className: "text-ink-muted",
+    });
+  }
+  columns.push(
+    { header: "Dicatat", cell: (r) => formatTanggal(r.tanggal_bayar), className: "text-ink-muted" },
+    { header: "Jumlah", cell: (r) => <Nominal value={r.jumlah} tone="income" />, align: "right" }
   );
 
-  const tabs: {
-    key: string;
-    label: string;
-    columns: string[];
-    rows: Row[];
-    emptyMessage: string;
-    footer?: Cell[];
-  }[] = [
-    {
-      key: "warga",
-      label: "Daftar Warga",
-      columns: ["Nama Lengkap", "Alamat"],
-      emptyMessage: "Belum ada data warga.",
-      rows: anggota.map((orang: any) => ({
-        id: orang.id,
-        cells: [
-          { label: "Nama Lengkap", value: orang.nama_lengkap },
-          { label: "Alamat", value: orang.alamat || "-", tone: "muted" },
-        ],
-      })),
-    },
-    {
-      key: "iuran",
-      label: "Iuran Bulanan",
-      columns: ["Nama Warga", "Periode", "Jumlah"],
-      emptyMessage: "Belum ada data Iuran Bulanan.",
-      rows: iuranBulanan.map((item: any) => ({
-        id: item.id,
-        cells: [
-          { label: "Nama Warga", value: getNamaWarga(item.anggota_id) },
-          { label: "Periode", value: item.periode_bulan || "-", tone: "muted" },
-          { label: "Jumlah", value: formatRupiah(item.jumlah), tone: "income" },
-        ],
-      })),
-    },
-    {
-      key: "denda",
-      label: "Denda Gotong-Royong",
-      columns: ["Nama Warga", "Periode", "Jumlah"],
-      emptyMessage: "Belum ada data Denda Gotong-Royong.",
-      rows: denda.map((item: any) => ({
-        id: item.id,
-        cells: [
-          { label: "Nama Warga", value: getNamaWarga(item.anggota_id) },
-          { label: "Periode", value: item.periode_bulan || "-", tone: "muted" },
-          { label: "Jumlah", value: formatRupiah(item.jumlah), tone: "income" },
-        ],
-      })),
-    },
-    {
-      key: "sumbangan",
-      label: "Sumbangan Wajib",
-      columns: ["Nama Warga", "Jumlah", "Tanggal"],
-      emptyMessage: "Belum ada data Sumbangan Wajib.",
-      rows: sumbanganWajib.map((item: any) => ({
-        id: item.id,
-        cells: [
-          { label: "Nama Warga", value: getNamaWarga(item.anggota_id) },
-          { label: "Jumlah", value: formatRupiah(item.jumlah), tone: "income" },
-          { label: "Tanggal", value: formatTanggal(item.tanggal_bayar), tone: "muted" },
-        ],
-      })),
-    },
-    {
-      key: "donasi",
-      label: "Donasi Sukarela",
-      columns: ["Nama Warga", "Jumlah", "Tanggal"],
-      emptyMessage: "Belum ada data Donasi Sukarela.",
-      rows: donasiSukarela.map((item: any) => ({
-        id: item.id,
-        cells: [
-          { label: "Nama Warga", value: getNamaWarga(item.anggota_id) },
-          { label: "Jumlah", value: formatRupiah(item.jumlah), tone: "income" },
-          { label: "Tanggal", value: formatTanggal(item.tanggal_bayar), tone: "muted" },
-        ],
-      })),
-      footer:
-        donasiSukarela.length > 0
-          ? [
-              { label: "Total Donasi Sukarela", value: "Total Donasi Sukarela" },
-              { label: "Jumlah", value: formatRupiah(totalDonasiSukarela), tone: "income" },
-              { label: "Entri", value: `${donasiSukarela.length} entri`, tone: "muted" },
-            ]
-          : undefined,
-    },
-    {
-      key: "pengeluaran",
-      label: "Pengeluaran",
-      columns: ["Tanggal", "Item Barang", "Total Biaya"],
-      emptyMessage: "Belum ada data Pengeluaran.",
-      rows: [...pengeluaran].reverse().map((item: any) => ({
-        id: item.id,
-        cells: [
-          { label: "Tanggal", value: item.tanggal, tone: "muted" },
-          { label: "Item Barang", value: item.item_barang },
-          { label: "Total Biaya", value: formatRupiah(item.total_biaya), tone: "expense" },
-        ],
-      })),
-    },
-  ];
+  return {
+    key,
+    label,
+    rows,
+    columns,
+    search: (r) => `${r.nama_anggota ?? ""} ${r.periode_bulan ? formatPeriode(r.periode_bulan) : ""}`,
+    total: (rs) => rs.reduce((s, r) => s + r.jumlah, 0),
+    totalTone: "income",
+    empty: `Belum ada data ${label}.`,
+  };
+}
 
-  const tab = tabs.find((t) => t.key === activeTab)!;
+export default function DataTabs({
+  anggota,
+  pemasukan,
+  pengeluaran,
+}: {
+  anggota: Anggota[];
+  pemasukan: PemasukanDenganNama[];
+  pengeluaran: Pengeluaran[];
+}) {
+  const baseId = useId();
+  const [activeKey, setActiveKey] = useState("warga");
+  const [query, setQuery] = useState("");
+  const [limit, setLimit] = useState(HALAMAN);
+  const deferredQuery = useDeferredValue(query);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const tabs = useMemo(() => {
+    const byKat = (k: string) => pemasukan.filter((p) => p.kategori === k);
+    const list: TabDef<any>[] = [
+      {
+        key: "warga",
+        label: "Daftar Warga",
+        rows: anggota,
+        columns: [
+          { header: "Nama Lengkap", cell: (r: Anggota) => r.nama_lengkap, primary: true, className: "font-medium text-ink" },
+          { header: "Alamat", cell: (r: Anggota) => r.alamat || "—", className: "text-ink-muted" },
+        ],
+        search: (r: Anggota) => `${r.nama_lengkap} ${r.alamat ?? ""}`,
+        empty: "Belum ada data warga.",
+      } satisfies TabDef<Anggota>,
+      pemasukanTab("iuran", "Iuran Bulanan", byKat("Iuran Bulanan"), "bulan"),
+      pemasukanTab("wajib", "Sumbangan Wajib", byKat("Sumbangan Wajib"), null),
+      pemasukanTab("awal", "Sumbangan Awal", byKat("Sumbangan Awal"), null),
+      pemasukanTab("denda", "Denda Gotong-Royong", byKat("Denda Gotong-Royong"), "tanggal"),
+      pemasukanTab("donasi", "Donasi Sukarela", byKat("Donasi Sukarela"), null),
+      {
+        key: "pengeluaran",
+        label: "Pengeluaran",
+        rows: pengeluaran,
+        columns: [
+          { header: "Item / Keperluan", cell: (r: Pengeluaran) => r.item_barang, primary: true, className: "font-medium text-ink" },
+          { header: "Tanggal", cell: (r: Pengeluaran) => formatTanggal(r.tanggal), className: "text-ink-muted" },
+          {
+            header: "Volume",
+            cell: (r: Pengeluaran) =>
+              `${r.volume ?? 1} × ${formatRupiah(r.harga_satuan ?? r.total_biaya)}`,
+            className: "num text-ink-muted",
+          },
+          { header: "Total", cell: (r: Pengeluaran) => <Nominal value={r.total_biaya} tone="expense" />, align: "right" },
+        ],
+        search: (r: Pengeluaran) => `${r.item_barang} ${r.vendor ?? ""} ${r.pembeli ?? ""}`,
+        total: (rs: Pengeluaran[]) => rs.reduce((s, r) => s + r.total_biaya, 0),
+        totalTone: "expense",
+        empty: "Belum ada data pengeluaran.",
+      } satisfies TabDef<Pengeluaran>,
+    ];
+    return list;
+  }, [anggota, pemasukan, pengeluaran]);
+
+  const activeIndex = Math.max(0, tabs.findIndex((t) => t.key === activeKey));
+  const tab = tabs[activeIndex];
+
+  const q = deferredQuery.trim().toLowerCase();
+  const filtered = q ? tab.rows.filter((r) => tab.search(r).toLowerCase().includes(q)) : tab.rows;
+  const visible = filtered.slice(0, limit);
+  const total = tab.total?.(filtered);
+
+  const pilih = (i: number) => {
+    setActiveKey(tabs[i].key);
+    setLimit(HALAMAN);
+    tabRefs.current[i]?.focus();
+  };
+
+  // Navigasi keyboard pola WAI-ARIA tabs
+  const onKeyDown = (e: KeyboardEvent) => {
+    const n = tabs.length;
+    if (e.key === "ArrowRight") pilih((activeIndex + 1) % n);
+    else if (e.key === "ArrowLeft") pilih((activeIndex - 1 + n) % n);
+    else if (e.key === "Home") pilih(0);
+    else if (e.key === "End") pilih(n - 1);
+    else return;
+    e.preventDefault();
+  };
+
+  const panelId = `${baseId}-panel`;
 
   return (
     <div>
-      {/* Tab Menu */}
-      <div className="flex overflow-x-auto border-b border-border bg-surface-alt">
-        {tabs.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setActiveTab(key)}
-            className={`shrink-0 px-4 min-h-11 font-medium text-sm transition-colors border-b-2 whitespace-nowrap ${
-              activeTab === key
-                ? "border-brand text-brand bg-surface"
-                : "border-transparent text-ink-muted hover:text-ink"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {/* Desktop table */}
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-surface text-ink-muted text-xs uppercase tracking-wide border-b border-border">
-              <th className="p-4 font-semibold w-12">No</th>
-              {tab.columns.map((c) => (
-                <th key={c} className="p-4 font-semibold">
-                  {c}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tab.rows.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={tab.columns.length + 1}
-                  className="p-8 text-center text-ink-faint"
+      {/* Tab */}
+      <div className="relative border-b border-border">
+        <div
+          role="tablist"
+          aria-label="Kategori data"
+          onKeyDown={onKeyDown}
+          className="scrollbar-none flex gap-1 overflow-x-auto px-3 sm:px-4"
+        >
+          {tabs.map((t, i) => {
+            const active = i === activeIndex;
+            return (
+              <button
+                key={t.key}
+                ref={(el) => {
+                  tabRefs.current[i] = el;
+                }}
+                role="tab"
+                id={`${baseId}-tab-${t.key}`}
+                aria-selected={active}
+                aria-controls={panelId}
+                tabIndex={active ? 0 : -1}
+                onClick={() => pilih(i)}
+                className={cn(
+                  "relative flex h-12 shrink-0 items-center gap-2 px-3 text-sm font-medium whitespace-nowrap transition-colors",
+                  "after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full",
+                  active ? "text-brand-dark after:bg-brand" : "text-ink-muted hover:text-ink"
+                )}
+              >
+                {t.label}
+                <span
+                  className={cn(
+                    "num rounded-full px-1.5 py-px text-xs font-semibold",
+                    active ? "bg-brand-soft text-brand-dark" : "bg-surface-alt text-ink-faint"
+                  )}
                 >
-                  {tab.emptyMessage}
-                </td>
-              </tr>
-            ) : (
-              tab.rows.map((row, index) => (
-                <tr key={row.id} className="border-b border-border hover:bg-surface-alt/60 transition-colors">
-                  <td className="p-4 text-ink-faint text-sm">{index + 1}</td>
-                  {row.cells.map((cell, ci) => (
-                    <td key={ci} className={`p-4 ${cell.tone ? toneClass[cell.tone] : "text-ink"}`}>
-                      {cell.value}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-          {tab.footer && (
-            <tfoot>
-              <tr className="bg-income-soft border-t-2 border-income/30">
-                <td colSpan={2} className="p-4 font-semibold text-ink">
-                  {tab.footer[0].value}
-                </td>
-                <td className={`p-4 ${toneClass.income}`}>{tab.footer[1].value}</td>
-                <td className="p-4 text-ink-faint text-sm">{tab.footer[2].value}</td>
-              </tr>
-            </tfoot>
-          )}
-        </table>
+                  {t.rows.length}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Mobile card list */}
-      <div className="sm:hidden">
-        {tab.footer && (
-          <div className="p-4 bg-income-soft border-b border-income/20 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-ink">Total Donasi Sukarela</p>
-              <p className="text-xs text-ink-faint">{tab.footer[2].value}</p>
-            </div>
-            <p className={`text-base ${toneClass.income}`}>{tab.footer[1].value}</p>
+      <div role="tabpanel" id={panelId} aria-labelledby={`${baseId}-tab-${tab.key}`}>
+        {/* Pencarian + total */}
+        <div className="flex flex-col gap-3 border-b border-border p-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 size-[1.125rem] -translate-y-1/2 text-ink-faint" aria-hidden />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setLimit(HALAMAN);
+              }}
+              placeholder={tab.key === "pengeluaran" ? "Cari item, vendor, pembeli…" : "Cari nama…"}
+              aria-label={`Cari di ${tab.label}`}
+              className={cn(inputClass, "h-11 pr-10 pl-10 [&::-webkit-search-cancel-button]:hidden")}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Hapus pencarian"
+                className="absolute top-1/2 right-1.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-ink-faint hover:bg-surface-alt hover:text-ink"
+              >
+                <X className="size-4" aria-hidden />
+              </button>
+            )}
           </div>
-        )}
-        {tab.rows.length === 0 ? (
-          <p className="p-8 text-center text-ink-faint text-sm">{tab.emptyMessage}</p>
+          {total !== undefined && filtered.length > 0 && (
+            <p className="text-sm text-ink-muted" aria-live="polite">
+              {q ? `${filtered.length} hasil · ` : `${filtered.length} entri · `}
+              Total <Nominal value={total} tone={tab.totalTone ?? "income"} />
+            </p>
+          )}
+        </div>
+
+        {filtered.length === 0 ? (
+          <EmptyState
+            icon={q ? Search : Inbox}
+            title={q ? "Tidak ada yang cocok" : "Belum ada data"}
+            description={q ? `Tidak ditemukan hasil untuk "${deferredQuery}".` : tab.empty}
+          />
         ) : (
-          <ul className="divide-y divide-border">
-            {tab.rows.map((row) => (
-              <li key={row.id} className="p-4">
-                <p className="font-medium text-ink">{row.cells[0].value}</p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-                  {row.cells.slice(1).map((cell, ci) => (
-                    <span key={ci} className={cell.tone ? toneClass[cell.tone] : "text-ink-muted"}>
-                      {cell.value}
-                    </span>
+          <>
+            {/* Desktop */}
+            <div className="hidden overflow-x-auto sm:block">
+              <table className="w-full text-left text-[0.9375rem]">
+                <thead>
+                  <tr className="border-b border-border bg-surface-alt/60">
+                    <th scope="col" className="w-14 py-3 pr-2 pl-5 text-xs font-semibold tracking-wide text-ink-faint uppercase">
+                      No
+                    </th>
+                    {tab.columns.map((c) => (
+                      <th
+                        key={c.header}
+                        scope="col"
+                        className={cn(
+                          "px-4 py-3 text-xs font-semibold tracking-wide text-ink-faint uppercase last:pr-5",
+                          c.align === "right" && "text-right"
+                        )}
+                      >
+                        {c.header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {visible.map((row, i) => (
+                    <tr key={row.id} className="transition-colors hover:bg-surface-alt/50">
+                      <td className="num py-3.5 pr-2 pl-5 text-sm text-ink-faint">{i + 1}</td>
+                      {tab.columns.map((c) => (
+                        <td
+                          key={c.header}
+                          className={cn("px-4 py-3.5 last:pr-5", c.className, c.align === "right" && "text-right")}
+                        >
+                          {c.cell(row)}
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </div>
-              </li>
-            ))}
-          </ul>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile */}
+            <ul className="divide-y divide-border sm:hidden">
+              {visible.map((row) => {
+                const primary = tab.columns.find((c) => c.primary)!;
+                const amount = tab.columns.find((c) => c.align === "right");
+                const rest = tab.columns.filter((c) => c !== primary && c !== amount);
+                return (
+                  <li key={row.id} className="flex items-start justify-between gap-3 px-4 py-3.5">
+                    <div className="min-w-0">
+                      <p className="font-medium text-ink">{primary.cell(row)}</p>
+                      <p className="mt-0.5 text-sm text-ink-muted">
+                        {rest.map((c, i) => (
+                          <span key={c.header}>
+                            {i > 0 && <span className="text-border-strong"> · </span>}
+                            {c.cell(row)}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+                    {amount && <div className="shrink-0 pt-0.5 text-[0.9375rem]">{amount.cell(row)}</div>}
+                  </li>
+                );
+              })}
+            </ul>
+
+            {filtered.length > limit && (
+              <div className="border-t border-border p-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => setLimit((l) => l + HALAMAN * 2)}
+                  className="h-11 rounded-xl px-4 text-sm font-semibold text-brand hover:bg-brand-soft"
+                >
+                  Tampilkan lebih banyak ({filtered.length - limit} lagi)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

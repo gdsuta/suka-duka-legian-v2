@@ -1,174 +1,187 @@
 "use client";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { useState } from "react";
+import { FileSpreadsheet, FileText } from "lucide-react";
+import { toast } from "sonner";
 import Button from "@/components/ui/Button";
+import { formatRupiah, formatTanggal } from "@/lib/format";
+import type { Anggota, Pemasukan, Pengeluaran } from "@/lib/types";
 
-export default function TombolEkspor({
-  anggota,
-  pemasukan,
-  pengeluaran,
-  totalPemasukan,
-  totalPengeluaran,
-  saldoKas,
-}: any) {
-  const buatPDFRingkasan = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("LAPORAN KEUANGAN SUKA DUKA LEGIAN", 14, 20);
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.text("Ringkasan Arus Kas Warga", 14, 28);
-    doc.setLineWidth(0.5);
-    doc.line(14, 32, 196, 32);
+interface Props {
+  anggota: Anggota[];
+  pemasukan: Pemasukan[];
+  pengeluaran: Pengeluaran[];
+  totalPemasukan: number;
+  totalPengeluaran: number;
+  saldoKas: number;
+}
 
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Rincian Pengeluaran", 14, 42);
+const JADE: [number, number, number] = [14, 107, 88];
+const MERAH: [number, number, number] = [180, 35, 24];
 
-    const tableColumn = ["No", "Tanggal", "Item/Keperluan", "Volume", "Total Biaya"];
-    const tableRows = pengeluaran.map((item: any, index: number) => [
-      index + 1,
-      item.tanggal || "-",
-      item.item_barang,
-      item.volume,
-      `Rp ${item.total_biaya.toLocaleString("id-ID")}`,
-    ]);
+// jsPDF (~350 KB) hanya dimuat saat tombol ditekan
+async function muatPdf() {
+  const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+  ]);
+  return { jsPDF, autoTable };
+}
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 48,
-      theme: "grid",
-      headStyles: { fillColor: [177, 70, 31] },
-    });
+function kepala(doc: import("jspdf").jsPDF, judul: string, sub: string, lebar: number) {
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text(judul, 14, 20);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(90);
+  doc.text(sub, 14, 27);
+  doc.text(
+    `Dicetak ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar" })}`,
+    lebar - 14,
+    27,
+    { align: "right" }
+  );
+  doc.setTextColor(0);
+  doc.setDrawColor(200);
+  doc.setLineWidth(0.4);
+  doc.line(14, 31, lebar - 14, 31);
+}
 
-    const finalY = (doc as any).lastAutoTable.finalY || 48;
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      `Total Pemasukan: Rp ${totalPemasukan.toLocaleString("id-ID")}`,
-      14,
-      finalY + 15
-    );
-    doc.text(
-      `Total Pengeluaran: Rp ${totalPengeluaran.toLocaleString("id-ID")}`,
-      14,
-      finalY + 23
-    );
-    doc.setFont("helvetica", "bold");
-    doc.text(
-      `SISA SALDO KAS: Rp ${saldoKas.toLocaleString("id-ID")}`,
-      14,
-      finalY + 33
-    );
+export default function TombolEkspor(props: Props) {
+  const [sibuk, setSibuk] = useState<"kas" | "detail" | null>(null);
 
-    doc.save("Laporan_Kas_Ringkasan.pdf");
+  const jalankan = async (jenis: "kas" | "detail", fn: () => Promise<void>) => {
+    setSibuk(jenis);
+    try {
+      await fn();
+      toast.success("Laporan PDF berhasil diunduh.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal membuat PDF. Coba lagi.");
+    } finally {
+      setSibuk(null);
+    }
   };
 
-  const buatPDFDetail = () => {
-    const doc = new jsPDF("l");
+  const pdfRingkasan = () =>
+    jalankan("kas", async () => {
+      const { jsPDF, autoTable } = await muatPdf();
+      const { pengeluaran, totalPemasukan, totalPengeluaran, saldoKas } = props;
+      const doc = new jsPDF();
+      kepala(doc, "LAPORAN KEUANGAN SUKA DUKA LEGIAN", "Ringkasan Arus Kas Warga", 210);
 
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("LAPORAN KEPATUHAN IURAN WARGA", 14, 20);
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
+      autoTable(doc, {
+        startY: 38,
+        theme: "plain",
+        body: [
+          ["Total Pemasukan", formatRupiah(totalPemasukan)],
+          ["Total Pengeluaran", formatRupiah(totalPengeluaran)],
+          ["Sisa Saldo Kas", formatRupiah(saldoKas)],
+        ],
+        styles: { fontSize: 11, cellPadding: 2 },
+        columnStyles: { 1: { halign: "right", fontStyle: "bold" } },
+        tableWidth: 100,
+        didParseCell: (d) => {
+          if (d.row.index === 2) d.cell.styles.textColor = JADE;
+        },
+      });
 
-    const bulanIni = new Date().toLocaleDateString("id-ID", {
-      month: "long",
-      year: "numeric",
-    });
-    doc.text(`Suka Duka Legian - Status Pembayaran per ${bulanIni}`, 14, 28);
-    doc.setLineWidth(0.5);
-    doc.line(14, 32, 283, 32);
+      const y = (doc as any).lastAutoTable.finalY + 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Rincian Pengeluaran", 14, y);
 
-    const tableColumn = [
-      "No",
-      "Nama Warga",
-      `Iuran (${bulanIni})`,
-      "Sumbangan Wajib",
-      "Donasi Sukarela",
-      "Denda",
-    ];
+      const urut = [...pengeluaran].sort((a, b) => (a.tanggal ?? "").localeCompare(b.tanggal ?? ""));
+      autoTable(doc, {
+        startY: y + 4,
+        head: [["No", "Tanggal", "Item / Keperluan", "Vol.", "Total Biaya"]],
+        body: urut.map((item, i) => [
+          i + 1,
+          formatTanggal(item.tanggal),
+          item.item_barang,
+          item.volume ?? 1,
+          formatRupiah(item.total_biaya),
+        ]),
+        foot: [["", "", "Total", "", formatRupiah(totalPengeluaran)]],
+        theme: "grid",
+        headStyles: { fillColor: MERAH },
+        footStyles: { fillColor: [245, 247, 249], textColor: 20 },
+        columnStyles: { 0: { cellWidth: 12 }, 3: { halign: "center" }, 4: { halign: "right" } },
+        styles: { fontSize: 9.5 },
+      });
 
-    const now = new Date();
-    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-
-    const tableRows = anggota.map((orang: any, index: number) => {
-      const trxWarga = pemasukan.filter((p: any) => p.anggota_id === orang.id);
-
-      const iuranBulanIni = trxWarga.find(
-        (p: any) =>
-          p.kategori === "Iuran Bulanan" &&
-          p.periode_bulan &&
-          p.periode_bulan.startsWith(yearMonth)
-      );
-      const statusIuran = iuranBulanIni ? "Lunas" : "Belum Bayar";
-
-      const sumbanganWajib = trxWarga
-        .filter((p: any) => p.kategori === "Sumbangan Wajib")
-        .reduce((sum: number, p: any) => sum + Number(p.jumlah), 0);
-      const donasi = trxWarga
-        .filter((p: any) => p.kategori === "Donasi Sukarela")
-        .reduce((sum: number, p: any) => sum + Number(p.jumlah), 0);
-      const denda = trxWarga
-        .filter((p: any) => p.kategori === "Denda Gotong-Royong")
-        .reduce((sum: number, p: any) => sum + Number(p.jumlah), 0);
-
-      return [
-        index + 1,
-        orang.nama_lengkap,
-        statusIuran,
-        sumbanganWajib > 0
-          ? `Rp ${sumbanganWajib.toLocaleString("id-ID")}`
-          : "-",
-        donasi > 0 ? `Rp ${donasi.toLocaleString("id-ID")}` : "-",
-        denda > 0 ? `Rp ${denda.toLocaleString("id-ID")}` : "-",
-      ];
+      doc.save("Laporan_Kas_Ringkasan.pdf");
     });
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 40,
-      theme: "grid",
-      headStyles: { fillColor: [14, 107, 88] },
-      didParseCell: function (data) {
-        if (data.cell.raw === "Belum Bayar") {
-          data.cell.styles.textColor = [220, 38, 38];
-          data.cell.styles.fontStyle = "bold";
-        }
-        if (data.cell.raw === "Lunas") {
-          data.cell.styles.textColor = [22, 163, 74];
-          data.cell.styles.fontStyle = "bold";
-        }
-      },
-    });
+  const pdfDetail = () =>
+    jalankan("detail", async () => {
+      const { jsPDF, autoTable } = await muatPdf();
+      const { anggota, pemasukan } = props;
+      const doc = new jsPDF("l");
 
-    doc.save("Laporan_Detail_Pembayaran_Warga.pdf");
-  };
+      const sekarang = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Makassar" });
+      const yearMonth = sekarang.slice(0, 7);
+      const bulanIni = new Date(`${yearMonth}-01T00:00:00Z`).toLocaleDateString("id-ID", {
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+
+      kepala(doc, "LAPORAN KEPATUHAN IURAN WARGA", `Suka Duka Legian — status pembayaran per ${bulanIni}`, 297);
+
+      const jumlahKat = (rows: Pemasukan[], k: string) =>
+        rows.filter((p) => p.kategori === k).reduce((s, p) => s + Number(p.jumlah), 0);
+
+      const body = anggota.map((orang, i) => {
+        const trx = pemasukan.filter((p) => p.anggota_id === orang.id);
+        const lunas = trx.some(
+          (p) => p.kategori === "Iuran Bulanan" && p.periode_bulan?.startsWith(yearMonth)
+        );
+        const wajib = jumlahKat(trx, "Sumbangan Wajib");
+        const donasi = jumlahKat(trx, "Donasi Sukarela");
+        const denda = jumlahKat(trx, "Denda Gotong-Royong");
+        return [
+          i + 1,
+          orang.nama_lengkap,
+          lunas ? "Lunas" : "Belum Bayar",
+          wajib > 0 ? formatRupiah(wajib) : "-",
+          donasi > 0 ? formatRupiah(donasi) : "-",
+          denda > 0 ? formatRupiah(denda) : "-",
+        ];
+      });
+
+      autoTable(doc, {
+        startY: 38,
+        head: [["No", "Nama Warga", `Iuran ${bulanIni}`, "Sumbangan Wajib", "Donasi Sukarela", "Denda"]],
+        body,
+        theme: "grid",
+        headStyles: { fillColor: JADE },
+        styles: { fontSize: 9.5 },
+        columnStyles: { 0: { cellWidth: 12 }, 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" } },
+        didParseCell: (d) => {
+          if (d.section !== "body") return;
+          if (d.cell.raw === "Belum Bayar") {
+            d.cell.styles.textColor = MERAH;
+            d.cell.styles.fontStyle = "bold";
+          } else if (d.cell.raw === "Lunas") {
+            d.cell.styles.textColor = JADE;
+            d.cell.styles.fontStyle = "bold";
+          }
+        },
+      });
+
+      doc.save("Laporan_Detail_Pembayaran_Warga.pdf");
+    });
 
   return (
-    <div className="flex gap-2 overflow-x-auto -mx-1 px-1">
-      <Button onClick={buatPDFRingkasan} variant="secondary" size="sm" className="shrink-0">
-        Cetak Kas
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <Button variant="secondary" onClick={pdfRingkasan} loading={sibuk === "kas"} disabled={sibuk !== null}>
+        {sibuk !== "kas" && <FileText aria-hidden />}
+        Laporan Kas (PDF)
       </Button>
-      <Button onClick={buatPDFDetail} variant="secondary" size="sm" className="shrink-0">
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-        Cetak Detail (Landscape)
+      <Button variant="secondary" onClick={pdfDetail} loading={sibuk === "detail"} disabled={sibuk !== null}>
+        {sibuk !== "detail" && <FileSpreadsheet aria-hidden />}
+        Kepatuhan Iuran (PDF)
       </Button>
     </div>
   );

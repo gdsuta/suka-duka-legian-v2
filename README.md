@@ -1,6 +1,6 @@
 # 💰 Suka Duka Legian — Finance Web App
 
-A community finance management web application for **Suka Duka Legian**, a neighborhood mutual-aid community at Perumahan Bali Erfina, Jalan Legian, Desa Bungkulan, Kecamatan Sawan, Kabupaten Buleleng, Bali, Indonesia. This app tracks member dues, community income, and expenses — making financial data transparent and accessible to all 40 members.
+A community finance management web application for **Suka Duka Legian**, a neighborhood mutual-aid community at Perumahan Bali Erfina, Jalan Legian, Desa Bungkulan, Kecamatan Sawan, Kabupaten Buleleng, Bali, Indonesia. This app tracks member dues, community income, and expenses — making financial data transparent and accessible to all community members.
 
 Built entirely on free-tier services as a voluntary project.
 
@@ -15,22 +15,21 @@ Built entirely on free-tier services as a voluntary project.
 ## ✨ Features
 
 ### Public (All Members)
-- 📊 **Live Dashboard** — Real-time view of current cash balance, total income, and total expenses
-- 👥 **Member Directory** — Full list of all 40 community members and their addresses
+- 📊 **Live Dashboard** — Cash balance, income/expense totals, this month's dues compliance, income-source breakdown
+- 👥 **Member Directory** — Full list of all community members and their addresses
 - 📈 **Monthly Cash Flow Chart** — Bar chart comparing income vs. expenses per month
 - 📋 **Data Tabs** — Organized views for monthly dues, gotong-royong fines, mandatory donations, and expenses
+- 🔎 **Search & Totals** — Every data tab is searchable with a running total
 - 📱 **PWA Support** — Installable as a mobile app on Android and iOS
 
 ### Admin Only (Authenticated)
-- 🔐 **Magic Link Login** — Passwordless authentication via email (Supabase Auth)
-- ➕ **Record Income** — Log member payments by category (monthly dues, donations, fines, etc.)
-- ➕ **Record Expenses** — Log community purchases with vendor, quantity, and unit price
+- 🔐 **Email + Password Login** — Hashed (scrypt) admin accounts, HttpOnly session cookie, brute-force throttling
+- ➕ **Record Income** — Category chips, month picker, suggested amounts, duplicate-payment warning
+- ➕ **Record Expenses** — Live total, volume stepper, buyer suggestions (total computed server-side)
 - ➕ **Add Members** — Register new community members
-- ✏️ **Manage Members** — Edit or delete existing members (with smart FK-safe deletion)
-- 🗑️ **Transaction History** — View and delete income/expense records
-- 📄 **PDF Export** — Generate two report types:
-  - Cash summary report (landscape, with expense breakdown)
-  - Member payment compliance report (landscape, color-coded Lunas/Belum Bayar)
+- ✏️ **Manage Members** — Search, inline edit, delete with full payment history (single transaction)
+- 🗑️ **Transaction History** — Filter by type/category, search, delete
+- 📄 **PDF Export** — Cash summary report and member payment compliance report (Lunas/Belum Bayar)
 
 ---
 
@@ -38,12 +37,14 @@ Built entirely on free-tier services as a voluntary project.
 
 | Layer | Technology | Cost |
 |---|---|---|
-| Framework | [Next.js 16](https://nextjs.org) (App Router) | Free |
+| Framework | [Next.js 16](https://nextjs.org) (App Router, Server Actions) | Free |
 | UI Library | [React 19](https://react.dev) | Free |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com) | Free |
-| Database & Auth | [Supabase](https://supabase.com) (Free tier) | Free |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com) + [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) | Free |
+| Database | [Neon](https://neon.tech) serverless Postgres (Free plan — scales to zero, never paused) | Free |
+| Auth | Built-in: scrypt password hashes + signed JWT cookie ([jose](https://github.com/panva/jose)) | Free |
 | Hosting | [Vercel](https://vercel.com) (Free tier) | Free |
 | Charts | [Recharts](https://recharts.org) | Free |
+| Icons | [Lucide](https://lucide.dev) | Free |
 | PDF Export | [jsPDF](https://github.com/parallax/jsPDF) + [jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable) | Free |
 | Toasts | [Sonner](https://sonner.emilkowal.ski) | Free |
 | Validation | [Zod](https://zod.dev) | Free |
@@ -51,183 +52,81 @@ Built entirely on free-tier services as a voluntary project.
 
 **Total monthly cost: Rp 0**
 
+> **Why Neon instead of Supabase?** Supabase free projects are paused after 7 days without activity and must be restored by hand. Neon's free compute only *idles* after 5 minutes and wakes automatically on the next request (≈0.5 s), so the app never goes offline.
+
 ---
 
 ## 🗄️ Database Schema
 
-Built on Supabase (PostgreSQL). Three main tables:
-
-```sql
--- Community members
-CREATE TABLE public.anggota (
-  id           uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  nama_lengkap text NOT NULL,
-  alamat       text,
-  created_at   timestamp DEFAULT now()
-);
-
--- Income records (dues, donations, fines)
-CREATE TABLE public.pemasukan (
-  id           uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  anggota_id   uuid REFERENCES public.anggota(id),
-  kategori     text NOT NULL,
-  jumlah       numeric NOT NULL,
-  periode_bulan date,
-  tanggal_bayar timestamp DEFAULT now()
-);
-
--- Expense records (purchases, operational costs)
-CREATE TABLE public.pengeluaran (
-  id           uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  item_barang  text NOT NULL,
-  tanggal      date,
-  vendor       text,
-  harga_satuan numeric,
-  volume       integer DEFAULT 1,
-  total_biaya  numeric NOT NULL,
-  pembeli      text
-);
-```
-
----
-
-## 📁 Project Structure
-
-```
-suka-duka-legian-v2/
-├── app/                              # Next.js App Router — routes only
-│   ├── page.tsx                      # Public dashboard
-│   ├── layout.tsx                    # Root layout with Toaster
-│   ├── loading.tsx                   # Dashboard skeleton loader
-│   ├── error.tsx                     # Global error boundary
-│   ├── login/
-│   │   └── page.tsx                  # Admin magic link login
-│   ├── auth/
-│   │   └── callback/route.ts         # Supabase auth callback handler
-│   └── admin/                        # Protected routes (auth required)
-│       ├── layout.tsx                # Server-side auth guard
-│       ├── catat-pemasukan/          # Record income
-│       ├── catat-pengeluaran/        # Record expenses
-│       ├── tambah-anggota/           # Add new member
-│       ├── kelola-anggota/           # Edit / delete members
-│       └── riwayat-transaksi/        # Transaction history
-├── components/                       # Reusable UI components
-│   ├── ControlPanel.tsx              # Top navigation bar (admin/public mode)
-│   ├── DataTabs.tsx                  # Tabbed data tables
-│   ├── GrafikBulanan.tsx             # Monthly bar chart
-│   └── TombolEkspor.tsx             # PDF export buttons
-├── lib/
-│   ├── supabase/
-│   │   ├── server.ts                 # Server-side Supabase client (SSR)
-│   │   └── client.ts                 # Browser-side Supabase client
-│   ├── env.ts                        # Runtime environment variable validation
-│   ├── config.ts                     # App constants (member cap, categories)
-│   └── schemas.ts                    # Zod validation schemas
-├── middleware.ts                     # Route protection for /admin/*
-├── public/
-│   ├── logo.png                      # Community logo
-│   ├── icon-192.png                  # PWA icon (192×192)
-│   ├── icon-512.png                  # PWA icon (512×512)
-│   └── manifest.json                 # PWA manifest
-├── CLAUDE.md                         # AI assistant conventions for this project
-└── .env.local.example                # Environment variable template
-```
+See [`db/schema.sql`](db/schema.sql). Tables: `anggota` (members), `pemasukan` (income), `pengeluaran` (expenses), `admin_users`, `login_attempts`.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org) v18 or higher
-- A [Supabase](https://supabase.com) account (free)
+- [Node.js](https://nodejs.org) v20.6 or higher
+- A [Neon](https://neon.tech) database (free) — easiest via Vercel → Storage → Neon
 - A [Vercel](https://vercel.com) account (free)
 
-### 1. Clone the repository
+### 1. Clone & install
 
 ```bash
 git clone https://github.com/gdsuta/suka-duka-legian-v2.git
 cd suka-duka-legian-v2
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
 ```
 
-### 3. Set up environment variables
-
-Copy the example file and fill in your Supabase credentials:
+### 2. Environment variables
 
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env.local
 ```
 
-Open `.env.local` and add your values:
+Fill in `DATABASE_URL` (Neon pooled connection string) and `AUTH_SECRET` (random, ≥ 32 characters):
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_ANON_KEY_HERE
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 ```
 
-Find these values in your Supabase Dashboard under **Project Settings → API**.
+### 3. Create tables, (optionally) import data, create an admin
 
-### 4. Set up the database
+```bash
+npm run db:setup
+npm run db:import          # only when migrating: imports db/backup/*.json (not committed)
+npm run admin:create -- you@example.com "a-strong-password"
+```
 
-Run the SQL statements from the [Database Schema](#️-database-schema) section above in your Supabase SQL Editor (**Database → SQL Editor → New Query**).
-
-### 5. Configure Supabase Auth
-
-In your Supabase Dashboard:
-1. Go to **Authentication → Providers → Email** → Enable **Magic Links**
-2. Go to **Authentication → URL Configuration**:
-   - Set **Site URL** to `http://localhost:3000` (for local dev) or your Vercel URL (for production)
-   - Add `http://localhost:3000/**` to **Redirect URLs**
-3. Go to **Authentication → Users → Invite User** → invite your admin email
-
-### 6. Run the development server
+### 4. Run
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
 ## 🔐 Authentication Flow
 
-This app uses **Supabase Magic Link** (passwordless email OTP):
+1. Admin taps **Masuk Admin** in the header
+2. Enters email + password on `/login` (5 failed attempts per 15 minutes per email are blocked)
+3. Server verifies the scrypt hash and sets a signed, HttpOnly session cookie (7 days)
+4. Dashboard shows **Aksi Cepat** and the admin navigation (bottom tab bar on mobile)
+5. **Keluar** clears the session
 
-1. Admin clicks **Mode Admin** on the dashboard
-2. Admin enters their email on the `/login` page
-3. Supabase sends a one-click login link to that email
-4. Admin clicks the link → redirected to `/auth/callback` → session created
-5. Dashboard reloads in **Admin Mode** with full write access
-6. Admin clicks **🔒 Kunci** to log out
-
-All routes under `/admin/*` are protected by both `middleware.ts` (edge-level) and `app/admin/layout.tsx` (server-level), providing double-layer protection.
+`/admin/*` is protected by `proxy.ts` and `app/admin/layout.tsx`, and every Server Action that writes data re-checks the session with `requireAdmin()`.
 
 ---
 
 ## 🚢 Deployment
 
-This app is deployed on **Vercel** with automatic deployments on every push to `main`.
+Deployed on **Vercel** with automatic deployments on every push to `main`.
 
-### Deploy to Vercel
-
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com) → **New Project** → Import your GitHub repo
-3. Add environment variables in Vercel Dashboard → **Settings → Environment Variables**:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. Deploy
-
-### After deploying, update Supabase:
-
-In **Authentication → URL Configuration**:
-- Update **Site URL** to `https://your-app.vercel.app`
-- Add `https://your-app.vercel.app/**` to **Redirect URLs**
+1. Vercel Dashboard → your project → **Storage** → **Create Database** → **Neon** → connect it to the project (this sets `DATABASE_URL`)
+2. **Settings → Environment Variables** → add `AUTH_SECRET`
+3. Run `npm run db:setup` and `npm run admin:create` once against that database (with the same `DATABASE_URL` in `.env.local`)
+4. Push to `main`
 
 ---
 
