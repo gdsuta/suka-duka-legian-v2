@@ -20,7 +20,19 @@ export function formatRupiahSingkat(n: number): string {
   return `Rp ${n}`;
 }
 
-const TANGGAL_SAJA = /^(\d{4})-(\d{2})-(\d{2})$/;
+/** 25rb · 1,25jt — untuk sel tabel yang sempit (grid denda) */
+export function formatRupiahRingkas(n: number): string {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) {
+    return `${(n / 1_000_000).toLocaleString("id-ID", { maximumFractionDigits: 2 })}jt`;
+  }
+  if (abs >= 1_000) {
+    return `${(n / 1_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })}rb`;
+  }
+  return formatRupiah(n);
+}
+
+const TANGGAL_SAJA =/^(\d{4})-(\d{2})-(\d{2})$/;
 
 /**
  * Kolom `date` ("YYYY-MM-DD") tidak punya jam/zona — tampilkan apa adanya (UTC)
