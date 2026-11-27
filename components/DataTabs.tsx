@@ -1,8 +1,10 @@
 "use client";
 import { useDeferredValue, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Inbox, Search, X } from "lucide-react";
+import GridDenda from "@/components/GridDenda";
 import EmptyState from "@/components/ui/EmptyState";
 import { inputClass } from "@/components/ui/Field";
+import { susunGridDenda } from "@/lib/denda";
 import { formatPeriode, formatRupiah, formatTanggal } from "@/lib/format";
 import type { Anggota, PemasukanDenganNama, Pengeluaran } from "@/lib/types";
 import { cn } from "@/lib/cn";
@@ -105,7 +107,7 @@ export default function DataTabs({
       pemasukanTab("iuran", "Iuran Bulanan", byKat("Iuran Bulanan"), "bulan"),
       pemasukanTab("wajib", "Sumbangan Wajib", byKat("Sumbangan Wajib"), null),
       pemasukanTab("awal", "Sumbangan Awal", byKat("Sumbangan Awal"), null),
-      pemasukanTab("denda", "Denda Gotong-Royong", byKat("Denda Gotong-Royong"), "tanggal"),
+      pemasukanTab("denda", "Denda Kerja Bakti", byKat("Denda Gotong-Royong"), "tanggal"),
       pemasukanTab("donasi", "Donasi Sukarela", byKat("Donasi Sukarela"), null),
       {
         key: "pengeluaran",
@@ -130,6 +132,8 @@ export default function DataTabs({
     ];
     return list;
   }, [anggota, pemasukan, pengeluaran]);
+
+  const gridDenda = useMemo(() => susunGridDenda(anggota, pemasukan), [anggota, pemasukan]);
 
   const activeIndex = Math.max(0, tabs.findIndex((t) => t.key === activeKey));
   const tab = tabs[activeIndex];
@@ -238,7 +242,9 @@ export default function DataTabs({
           )}
         </div>
 
-        {filtered.length === 0 ? (
+        {tab.key === "denda" ? (
+          <GridDenda grid={gridDenda} query={deferredQuery} />
+        ) : filtered.length === 0 ? (
           <EmptyState
             icon={q ? Search : Inbox}
             title={q ? "Tidak ada yang cocok" : "Belum ada data"}
