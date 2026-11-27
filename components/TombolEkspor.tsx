@@ -3,7 +3,9 @@ import { useState } from "react";
 import { FileSpreadsheet, FileText } from "lucide-react";
 import { toast } from "sonner";
 import Button from "@/components/ui/Button";
+import { TANPA_KATEGORI } from "@/lib/config";
 import { susunGridDenda } from "@/lib/denda";
+import { ringkasPengeluaranPerKategori } from "@/lib/ringkasan";
 import { formatRupiah, formatRupiahRingkas, formatTanggal } from "@/lib/format";
 import type { Anggota, Pemasukan, Pengeluaran } from "@/lib/types";
 
@@ -87,6 +89,30 @@ export default function TombolEkspor(props: Props) {
         },
       });
 
+      // Ke mana uang dipakai — ringkasan per keperluan sebelum rincian lengkap
+      const yKategori = (doc as any).lastAutoTable.finalY + 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Pengeluaran per Keperluan", 14, yKategori);
+      const perKategori = ringkasPengeluaranPerKategori(pengeluaran);
+      autoTable(doc, {
+        startY: yKategori + 4,
+        head: [["Keperluan", "Entri", "Total", "Porsi"]],
+        body: perKategori.map((k) => [
+          k.kategori,
+          k.jumlahEntri,
+          formatRupiah(k.total),
+          `${((k.total / (totalPengeluaran || 1)) * 100).toLocaleString("id-ID", { maximumFractionDigits: 1 })}%`,
+        ]),
+        foot: [["Total", pengeluaran.length, formatRupiah(totalPengeluaran), "100%"]],
+        theme: "grid",
+        headStyles: { fillColor: MERAH },
+        footStyles: { fillColor: [245, 247, 249], textColor: 20 },
+        columnStyles: { 1: { halign: "center" }, 2: { halign: "right" }, 3: { halign: "right" } },
+        styles: { fontSize: 9.5 },
+        tableWidth: 130,
+      });
+
       const y = (doc as any).lastAutoTable.finalY + 10;
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
@@ -95,19 +121,20 @@ export default function TombolEkspor(props: Props) {
       const urut = [...pengeluaran].sort((a, b) => (a.tanggal ?? "").localeCompare(b.tanggal ?? ""));
       autoTable(doc, {
         startY: y + 4,
-        head: [["No", "Tanggal", "Item / Keperluan", "Vol.", "Total Biaya"]],
+        head: [["No", "Tanggal", "Item / Keperluan", "Kategori", "Vol.", "Total Biaya"]],
         body: urut.map((item, i) => [
           i + 1,
           formatTanggal(item.tanggal),
           item.item_barang,
+          item.kategori ?? TANPA_KATEGORI,
           item.volume ?? 1,
           formatRupiah(item.total_biaya),
         ]),
-        foot: [["", "", "Total", "", formatRupiah(totalPengeluaran)]],
+        foot: [["", "", "Total", "", "", formatRupiah(totalPengeluaran)]],
         theme: "grid",
         headStyles: { fillColor: MERAH },
         footStyles: { fillColor: [245, 247, 249], textColor: 20 },
-        columnStyles: { 0: { cellWidth: 12 }, 3: { halign: "center" }, 4: { halign: "right" } },
+        columnStyles: { 0: { cellWidth: 12 }, 4: { halign: "center" }, 5: { halign: "right" } },
         styles: { fontSize: 9.5 },
       });
 

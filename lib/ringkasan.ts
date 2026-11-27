@@ -1,6 +1,34 @@
-import { KATEGORI_PEMASUKAN, type KategoriPemasukan } from "@/lib/config";
+import {
+  KATEGORI_PEMASUKAN,
+  TANPA_KATEGORI,
+  type KategoriPemasukan,
+  type KategoriPengeluaran,
+} from "@/lib/config";
 import { bulanIni, kunciBulan } from "@/lib/format";
 import type { Anggota, Pemasukan, Pengeluaran } from "@/lib/types";
+
+export interface KategoriTotal<K extends string> {
+  kategori: K;
+  total: number;
+  jumlahEntri: number;
+}
+
+export type KategoriPengeluaranAtauKosong = KategoriPengeluaran | typeof TANPA_KATEGORI;
+
+/** Total pengeluaran per keperluan, terbesar dulu. Pengeluaran tanpa kategori → "Belum dikategorikan". */
+export function ringkasPengeluaranPerKategori(
+  pengeluaran: Pick<Pengeluaran, "kategori" | "total_biaya">[]
+): KategoriTotal<KategoriPengeluaranAtauKosong>[] {
+  const map = new Map<KategoriPengeluaranAtauKosong, KategoriTotal<KategoriPengeluaranAtauKosong>>();
+  for (const k of pengeluaran) {
+    const kategori = k.kategori ?? TANPA_KATEGORI;
+    const row = map.get(kategori) ?? { kategori, total: 0, jumlahEntri: 0 };
+    row.total += Number(k.total_biaya) || 0;
+    row.jumlahEntri += 1;
+    map.set(kategori, row);
+  }
+  return [...map.values()].filter((k) => k.total > 0).sort((a, b) => b.total - a.total);
+}
 
 export interface Ringkasan {
   totalMasuk: number;
@@ -12,7 +40,8 @@ export interface Ringkasan {
   jumlahAnggota: number;
   /** Anggota yang sudah membayar Iuran Bulanan untuk bulan ini */
   lunasBulanIni: number;
-  perKategori: { kategori: KategoriPemasukan; total: number; jumlahEntri: number }[];
+  perKategori: KategoriTotal<KategoriPemasukan>[];
+  perKategoriPengeluaran: KategoriTotal<KategoriPengeluaranAtauKosong>[];
 }
 
 export function hitungRingkasan(
@@ -66,6 +95,7 @@ export function hitungRingkasan(
     }))
       .filter((k) => k.total > 0)
       .sort((a, b) => b.total - a.total),
+    perKategoriPengeluaran: ringkasPengeluaranPerKategori(pengeluaran),
   };
 }
 
