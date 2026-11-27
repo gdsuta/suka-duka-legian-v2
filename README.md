@@ -18,18 +18,20 @@ Built entirely on free-tier services as a voluntary project.
 - 📊 **Live Dashboard** — Cash balance, income/expense totals, this month's dues compliance, income-source breakdown
 - 👥 **Member Directory** — Full list of all community members and their addresses
 - 📈 **Monthly Cash Flow Chart** — Bar chart comparing income vs. expenses per month
-- 📋 **Data Tabs** — Organized views for monthly dues, gotong-royong fines, mandatory donations, and expenses
+- 📋 **Data Tabs** — Organized views for monthly dues, mandatory donations, and expenses
+- ✅ **Fines per Kerja Bakti** — Members × kerja bakti dates grid; tap an amount to see when it was paid
+- 🧾 **Where the Money Went** — Spending summarised by purpose (lighting, cleaning, facilities, refreshments, …)
 - 🔎 **Search & Totals** — Every data tab is searchable with a running total
 - 📱 **PWA Support** — Installable as a mobile app on Android and iOS
 
 ### Admin Only (Authenticated)
 - 🔐 **Email + Password Login** — Hashed (scrypt) admin accounts, HttpOnly session cookie, brute-force throttling
 - ➕ **Record Income** — Category chips, month picker, suggested amounts, duplicate-payment warning
-- ➕ **Record Expenses** — Live total, volume stepper, buyer suggestions (total computed server-side)
+- ➕ **Record Expenses** — Required category, live total, volume stepper, buyer suggestions (total computed server-side)
 - ➕ **Add Members** — Register new community members
 - ✏️ **Manage Members** — Search, inline edit, delete with full payment history (single transaction)
 - 🗑️ **Transaction History** — Filter by type/category, search, delete
-- 📄 **PDF Export** — Cash summary report and member payment compliance report (Lunas/Belum Bayar)
+- 📄 **PDF Export** — Cash report with spending per category, and member report (Lunas/Belum Bayar + fines grid for the last 6 kerja bakti)
 
 ---
 
@@ -150,6 +152,10 @@ Once installed, the app runs in standalone mode without browser UI, similar to a
 | Donasi Sukarela | Voluntary donation |
 | Denda Gotong-Royong | Fine for missing community work day |
 | Sumbangan Awal | Initial joining contribution |
+
+## 🧾 Expense Categories
+
+Penerangan Jalan · Kebersihan Lingkungan · Fasilitas Umum · Konsumsi · Acara & Perayaan · Sosial & Duka · Administrasi & Lainnya — defined in `lib/config.ts` (`KATEGORI_PENGELUARAN`).
 
 ---
 

@@ -76,7 +76,8 @@ suka-duka-legian/
 - Target sentuh minimal 44px (`size="md"`/`size="icon"` pada Button)
 
 ### Konstanta
-- Batas anggota: `JUMLAH_ANGGOTA_MAKSIMAL`, kategori: `KATEGORI_PEMASUKAN`, `KATEGORI_BERPERIODE`, `WARNA_KATEGORI` dari `lib/config.ts`
+- Batas anggota: `JUMLAH_ANGGOTA_MAKSIMAL`, kategori: `KATEGORI_PEMASUKAN`, `KATEGORI_BERPERIODE`, `WARNA_KATEGORI`, `KATEGORI_PENGELUARAN`, `WARNA_KATEGORI_PENGELUARAN`, `TANPA_KATEGORI` dari `lib/config.ts`
+- Denda dikelompokkan per tanggal kerja bakti (`periode_bulan`), bukan tanggal bayar — lihat `susunGridDenda` di `lib/denda.ts`
 - Jangan hardcode nilai-nilai ini langsung di komponen
 
 ### Performa
@@ -103,4 +104,6 @@ npm run db:setup                     # sekali, buat tabel
 npm run admin:create -- email "pw"   # buat akun admin
 npm run dev
 npm run typecheck                    # cek tipe TypeScript
+npm test                             # unit test (Vitest) untuk logika di lib/
+npm run db:backfill-kategori         # uji coba isi kategori pengeluaran lama (tambah -- --apply untuk menyimpan)
 ```
