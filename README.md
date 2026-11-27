@@ -27,6 +27,7 @@ Built entirely on free-tier services as a voluntary project.
 ### Admin Only (Authenticated)
 - 🔐 **Email + Password Login** — Hashed (scrypt) admin accounts, HttpOnly session cookie, brute-force throttling
 - ➕ **Record Income** — Category chips, month picker, suggested amounts, duplicate-payment warning
+- 📒 **Batch Iuran Entry** — Logbook-style members × months grid: tick paid months, check the running total, save the whole page at once (already-recorded months are locked and never duplicated)
 - ➕ **Record Expenses** — Required category, live total, volume stepper, buyer suggestions (total computed server-side)
 - ➕ **Add Members** — Register new community members
 - ✏️ **Manage Members** — Search, inline edit, delete with full payment history (single transaction)

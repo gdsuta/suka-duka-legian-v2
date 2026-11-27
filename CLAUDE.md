@@ -17,6 +17,7 @@ suka-duka-legian/
 │   └── admin/                  ← Semua route yang butuh autentikasi
 │       ├── layout.tsx          ← Auth guard — redirect ke /login jika belum login
 │       ├── catat-pemasukan/
+│       ├── catat-iuran/        ← Catat Iuran Sekaligus (grid buku catatan)
 │       ├── catat-pengeluaran/
 │       ├── tambah-anggota/
 │       ├── kelola-anggota/
@@ -34,6 +35,7 @@ suka-duka-legian/
 │   ├── session.ts              ← Tanda tangan & verifikasi JWT (dipakai juga oleh proxy.ts)
 │   ├── password.ts             ← Hash scrypt
 │   ├── ringkasan.ts            ← Perhitungan saldo, per kategori, arus kas bulanan
+│   ├── denda.ts · iuran.ts     ← Grid denda per kerja bakti & grid iuran anggota × bulan (murni, diuji)
 │   ├── format.ts               ← formatRupiah, formatTanggal, formatPeriode (zona WITA)
 │   ├── env.ts · config.ts · schemas.ts · types.ts
 ├── db/schema.sql               ← Skema database
