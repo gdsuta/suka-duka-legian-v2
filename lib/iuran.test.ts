@@ -79,3 +79,20 @@ describe("jumlahBayarPerBulan", () => {
 test("tanggalBayarWita stores the date received at 12:00 WITA", () => {
   expect(tanggalBayarWita("2026-11-27")).toBe("2026-11-27T04:00:00.000Z");
 });
+
+import { pulihkanCentang } from "@/lib/iuran";
+
+describe("pulihkanCentang (restore unsaved ticks after leaving the page)", () => {
+  const g = susunGridIuran([A, B], [iuran("a", "2026-10-01")], 2026);
+  test("keeps valid ticks", () => {
+    expect([...pulihkanCentang(JSON.stringify(["b|2026-10", "a|2026-11"]), g)].sort()).toEqual(["a|2026-11", "b|2026-10"]);
+  });
+  test("drops ticks that have since been recorded, unknown members and other years", () => {
+    expect([...pulihkanCentang(JSON.stringify(["a|2026-10", "zzz|2026-10", "b|2025-10"]), g)]).toEqual([]);
+  });
+  test("garbage or empty storage gives no ticks", () => {
+    expect(pulihkanCentang("{oops", g).size).toBe(0);
+    expect(pulihkanCentang(null, g).size).toBe(0);
+    expect(pulihkanCentang(JSON.stringify({ a: 1 }), g).size).toBe(0);
+  });
+});

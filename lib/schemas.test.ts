@@ -78,3 +78,14 @@ describe("IuranSekaligusSchema", () => {
     expect(r.entri).toHaveLength(2);
   });
 });
+
+describe("IuranSekaligusSchema tanggal_diterima bounds", () => {
+  test("a year typo far in the past is rejected", () => {
+    expect(pesan({ ...sah, tanggal_diterima: "2006-11-27" }, "tanggal_diterima")).toEqual([
+      "Tanggal diterima terlalu lama (paling awal 1 Januari tahun lalu)",
+    ]);
+  });
+  test("an impossible calendar date is rejected", () => {
+    expect(pesan({ ...sah, tanggal_diterima: "2026-02-30" }, "tanggal_diterima")).toEqual(["Tanggal tidak valid"]);
+  });
+});

@@ -12,6 +12,7 @@ import { bulanIni, formatPeriode, formatRupiah, formatTanggal, hariIni } from "@
 import {
   jumlahBayarPerBulan,
   kunciCentang,
+  pulihkanCentang,
   ringkasCentang,
   type GridIuran as Grid,
 } from "@/lib/iuran";
@@ -37,6 +38,7 @@ export default function GridIuran({
   const [errors, setErrors] = useState<Record<string, string[] | undefined>>({});
   const [pending, startTransition] = useTransition();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const kunciSimpanan = `sdl-iuran-centang-${tahun}`;
 
   const jumlahPerBulan = Number(jumlah) || 0;
   const ringkas = ringkasCentang(centang, jumlahPerBulan);
@@ -50,6 +52,37 @@ export default function GridIuran({
     const th = el?.querySelector<HTMLElement>(`[data-bulan="${bulanIni()}"]`);
     if (el && th) el.scrollLeft = Math.max(0, th.offsetLeft - el.clientWidth / 2);
   }, [tahun]);
+
+  // Centang disimpan di perangkat (per tahun) agar tidak hilang saat pindah halaman, kembali,
+  // atau gagal menyimpan. Saat dipulihkan, bulan yang kini sudah tercatat dibuang.
+  const sudahPulih = useRef(false);
+  useEffect(() => {
+    let raw: string | null = null;
+    try {
+      raw = sessionStorage.getItem(kunciSimpanan);
+    } catch {}
+    const pulih = pulihkanCentang(raw, grid);
+    sudahPulih.current = true;
+    if (pulih.size > 0) {
+      setCentang(pulih);
+      toast.info(`${pulih.size} centang yang belum disimpan dipulihkan.`);
+    }
+    // Hanya saat halaman/tahun dibuka
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kunciSimpanan]);
+
+  useEffect(() => {
+    if (!sudahPulih.current) return;
+    try {
+      if (centang.size > 0) sessionStorage.setItem(kunciSimpanan, JSON.stringify([...centang]));
+      else sessionStorage.removeItem(kunciSimpanan);
+    } catch {}
+  }, [centang, kunciSimpanan]);
+
+  // Setelah data diperbarui (mis. tersimpan di tempat lain), buang centang yang kini sudah tercatat
+  useEffect(() => {
+    setCentang((s) => (s.size ? pulihkanCentang(JSON.stringify([...s]), grid) : s));
+  }, [grid]);
 
   // Peringatan bila meninggalkan halaman dengan centang yang belum disimpan
   useEffect(() => {
@@ -74,7 +107,18 @@ export default function GridIuran({
       return { anggota_id: k.slice(0, i), bulan: k.slice(i + 1) };
     });
     startTransition(async () => {
-      const res = await catatIuranSekaligus({ jumlah: jumlahPerBulan, tanggal_diterima: tanggal, entri });
+      let res: Awaited<ReturnType<typeof catatIuranSekaligus>>;
+      try {
+        res = await catatIuranSekaligus({ jumlah: jumlahPerBulan, tanggal_diterima: tanggal, entri });
+      } catch {
+        // Koneksi putus atau sesi berakhir: centang tetap ada (juga tersimpan di perangkat)
+        toast.error("Gagal menghubungi server — koneksi terputus atau sesi berakhir.", {
+          description: "Centang tidak hilang. Coba Simpan lagi, atau masuk ulang bila diminta.",
+          duration: 12000,
+        });
+        router.refresh();
+        return;
+      }
       if (!res.ok) {
         setErrors(res.fieldErrors ?? {});
         toast.error(res.message);
@@ -151,14 +195,14 @@ export default function GridIuran({
           </span>
         </p>
 
-        <div ref={scrollRef} className="overflow-x-auto">
+        <div ref={scrollRef} className="max-h-[70dvh] overflow-auto overscroll-contain">
           <table className="w-full border-separate border-spacing-0 text-left text-[0.9375rem]">
             <caption className="sr-only">Iuran bulanan {tahun} per anggota</caption>
             <thead>
               <tr>
                 <th
                   scope="col"
-                  className="sticky left-0 z-10 w-32 min-w-32 border-b border-border bg-surface-alt px-4 py-3 text-xs font-semibold tracking-wide text-ink-faint uppercase sm:w-56 sm:pl-5"
+                  className="sticky top-0 left-0 z-30 w-32 min-w-32 border-b border-border bg-surface-alt px-4 py-3 text-xs font-semibold tracking-wide text-ink-faint uppercase sm:w-56 sm:pl-5"
                 >
                   Nama Warga
                 </th>
@@ -168,7 +212,7 @@ export default function GridIuran({
                     scope="col"
                     data-bulan={b}
                     className={cn(
-                      "border-b border-border bg-surface-alt px-1 py-3 text-center text-xs font-semibold",
+                      "sticky top-0 z-20 border-b border-border bg-surface-alt px-1 py-3 text-center text-xs font-semibold",
                       b === bulanIni() ? "text-brand-dark" : "text-ink-faint"
                     )}
                   >
@@ -228,14 +272,17 @@ export default function GridIuran({
               <tr>
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 bg-surface-alt px-4 py-3 text-xs font-semibold tracking-wide text-ink-faint uppercase sm:pl-5"
+                  className="sticky bottom-0 left-0 z-30 border-t border-border bg-surface-alt px-4 py-3 text-xs font-semibold tracking-wide text-ink-faint uppercase sm:pl-5"
                 >
                   Sudah bayar
                 </th>
                 {grid.bulan.map((b) => {
                   const { tercatat, dicentang } = perBulan[b];
                   return (
-                    <td key={b} className="bg-surface-alt px-1 py-3 text-center text-xs whitespace-nowrap">
+                    <td
+                      key={b}
+                      className="sticky bottom-0 z-20 border-t border-border bg-surface-alt px-1 py-3 text-center text-xs whitespace-nowrap"
+                    >
                       <span className="num font-semibold text-ink">
                         {tercatat}
                         {dicentang > 0 && <span className="text-brand">+{dicentang}</span>}

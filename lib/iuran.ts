@@ -84,3 +84,27 @@ export function jumlahBayarPerBulan(grid: GridIuran, centang: Iterable<string>) 
 export function tanggalBayarWita(tanggal: string): string {
   return `${tanggal}T04:00:00.000Z`;
 }
+
+/**
+ * Pulihkan centang yang belum disimpan (dari sessionStorage) — hanya yang masih sah:
+ * anggota & bulan ada di grid, dan bulan itu belum tercatat (mungkin sudah disimpan di tempat lain).
+ */
+export function pulihkanCentang(raw: string | null, grid: GridIuran): Set<string> {
+  let data: unknown;
+  try {
+    data = raw ? JSON.parse(raw) : [];
+  } catch {
+    return new Set();
+  }
+  if (!Array.isArray(data)) return new Set();
+  const barisById = new Map(grid.baris.map((b) => [b.anggotaId, b]));
+  const bulan = new Set(grid.bulan);
+  const hasil = new Set<string>();
+  for (const k of data) {
+    if (typeof k !== "string" || !k.includes("|")) continue;
+    const { anggotaId, bulan: b } = pecahKunci(k);
+    const baris = barisById.get(anggotaId);
+    if (baris && bulan.has(b) && !baris.tercatat[b]) hasil.add(k);
+  }
+  return hasil;
+}

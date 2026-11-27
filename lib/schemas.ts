@@ -2,10 +2,18 @@ import { z } from "zod";
 import { KATEGORI_PEMASUKAN, KATEGORI_BERPERIODE, KATEGORI_PENGELUARAN } from "@/lib/config";
 import { hariIni } from "@/lib/format";
 
+// Tanggal kalender yang benar-benar ada (Date.parse menerima "2026-02-30", jadi cek bolak-balik)
 const tanggalValid = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Tanggal tidak valid")
-  .refine((val) => !isNaN(Date.parse(val)), { message: "Tanggal tidak valid" });
+  .refine(
+    (val) => {
+      const [y, m, d] = val.split("-").map(Number);
+      const t = new Date(Date.UTC(y, m - 1, d));
+      return t.getUTCFullYear() === y && t.getUTCMonth() === m - 1 && t.getUTCDate() === d;
+    },
+    { message: "Tanggal tidak valid" }
+  );
 
 const uang = (label: string) =>
   z
@@ -72,9 +80,12 @@ export const IuranSekaligusSchema = z.object({
     .positive("Jumlah harus lebih dari 0")
     .max(1_000_000_000, "Jumlah terlalu besar"),
   // Bandingkan sebagai string YYYY-MM-DD dengan hari ini di WITA (bukan jam server UTC)
-  tanggal_diterima: tanggalValid.refine((t) => t <= hariIni(), {
-    message: "Tanggal diterima tidak boleh di masa depan",
-  }),
+  tanggal_diterima: tanggalValid
+    .refine((t) => t <= hariIni(), { message: "Tanggal diterima tidak boleh di masa depan" })
+    // Cegah salah ketik tahun (mis. 2006) yang akan merusak grafik arus kas publik
+    .refine((t) => t >= `${Number(hariIni().slice(0, 4)) - 1}-01-01`, {
+      message: "Tanggal diterima terlalu lama (paling awal 1 Januari tahun lalu)",
+    }),
   entri: z
     .array(
       z.object({
