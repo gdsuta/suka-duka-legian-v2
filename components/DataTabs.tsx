@@ -2,6 +2,7 @@
 import { useDeferredValue, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Inbox, Search, X } from "lucide-react";
 import GridDenda from "@/components/GridDenda";
+import TabelIuran from "@/components/TabelIuran";
 import Badge, { TONE_KATEGORI_PENGELUARAN } from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
 import { inputClass } from "@/components/ui/Field";
@@ -60,7 +61,7 @@ function pemasukanTab(
     });
   }
   columns.push(
-    { header: "Dicatat", cell: (r) => formatTanggal(r.tanggal_bayar), className: "text-ink-muted" },
+    { header: "Tgl. Bayar", cell: (r) => formatTanggal(r.tanggal_bayar), className: "text-ink-muted" },
     { header: "Jumlah", cell: (r) => <Nominal value={r.jumlah} tone="income" />, align: "right" }
   );
 
@@ -243,7 +244,8 @@ export default function DataTabs({
               </button>
             )}
           </div>
-          {total !== undefined && filtered.length > 0 && (
+          {/* Iuran menampilkan total per tahun di tabelnya sendiri */}
+          {total !== undefined && filtered.length > 0 && tab.key !== "iuran" && (
             <p className="text-sm text-ink-muted" aria-live="polite">
               {q ? `${filtered.length} hasil · ` : `${filtered.length} entri · `}
               Total <Nominal value={total} tone={tab.totalTone ?? "income"} />
@@ -251,7 +253,9 @@ export default function DataTabs({
           )}
         </div>
 
-        {tab.key === "denda" ? (
+        {tab.key === "iuran" ? (
+          <TabelIuran anggota={anggota} pemasukan={pemasukan} query={deferredQuery} />
+        ) : tab.key === "denda" ? (
           <GridDenda grid={gridDenda} query={deferredQuery} />
         ) : filtered.length === 0 ? (
           <EmptyState

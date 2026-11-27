@@ -4,7 +4,7 @@ import type { Pemasukan } from "@/lib/types";
 export interface CatatanIuran {
   /** Dijumlahkan bila ada catatan ganda (data lama) */
   jumlah: number;
-  /** Timestamp ISO pencatatan terbaru */
+  /** Timestamp ISO tanggal bayar terbaru */
   tanggalBayar: string;
 }
 
@@ -49,6 +49,15 @@ export function susunGridIuran(
   }
 
   return { bulan, baris };
+}
+
+/** Tahun yang punya catatan iuran, ditambah tahun berjalan — terbaru dulu. */
+export function tahunIuran(pemasukan: Pick<Pemasukan, "kategori" | "periode_bulan">[], tahunIni: number): number[] {
+  const tahun = new Set([tahunIni]);
+  for (const p of pemasukan) {
+    if (p.kategori === KATEGORI_IURAN && p.periode_bulan) tahun.add(Number(p.periode_bulan.slice(0, 4)));
+  }
+  return [...tahun].filter((t) => t > 0).sort((a, b) => b - a);
 }
 
 /** Kunci sel yang dicentang: "anggotaId|YYYY-MM" */

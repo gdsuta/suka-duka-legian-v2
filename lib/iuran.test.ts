@@ -4,6 +4,7 @@ import {
   kunciCentang,
   ringkasCentang,
   susunGridIuran,
+  tahunIuran,
   tanggalBayarWita,
 } from "@/lib/iuran";
 
@@ -94,5 +95,13 @@ describe("pulihkanCentang (restore unsaved ticks after leaving the page)", () =>
     expect(pulihkanCentang("{oops", g).size).toBe(0);
     expect(pulihkanCentang(null, g).size).toBe(0);
     expect(pulihkanCentang(JSON.stringify({ a: 1 }), g).size).toBe(0);
+  });
+});
+
+describe("tahunIuran", () => {
+  test("years that have iuran, plus the current year, newest first", () => {
+    const p = [iuran("a", "2024-05-01"), iuran("a", "2025-01-01"), iuran("b", "2025-02-01"), iuran("a", "2023-01-01", 5, "x", "Donasi Sukarela")];
+    expect(tahunIuran(p, 2026)).toEqual([2026, 2025, 2024]);
+    expect(tahunIuran([], 2026)).toEqual([2026]);
   });
 });

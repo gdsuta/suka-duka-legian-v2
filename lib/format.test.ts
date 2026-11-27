@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { formatRupiahRingkas } from "@/lib/format";
+import { formatRupiahRingkas, formatTanggalPendek } from "@/lib/format";
 
 test("formatRupiahRingkas shortens amounts for narrow cells", () => {
   expect(formatRupiahRingkas(25000)).toBe("25rb");
@@ -16,4 +16,11 @@ test("formatRupiahRingkas never rounds: falls back to the full amount when the s
   expect(formatRupiahRingkas(237550)).toBe("Rp 237.550");
   expect(formatRupiahRingkas(999950)).toBe("Rp 999.950");
   expect(formatRupiahRingkas(37500)).toBe("37,5rb");
+});
+
+test("formatTanggalPendek gives dd/mm/yy, timestamps in WITA, date-only as-is", () => {
+  expect(formatTanggalPendek("2026-03-09")).toBe("09/03/26");
+  // 20:00 UTC = 04:00 WITA keesokan harinya
+  expect(formatTanggalPendek("2026-03-09T20:00:00.000Z")).toBe("10/03/26");
+  expect(formatTanggalPendek(null)).toBe("—");
 });

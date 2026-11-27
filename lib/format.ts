@@ -61,6 +61,18 @@ export function formatTanggal(value: string | null | undefined): string {
   });
 }
 
+/** 09/02/26 — tanggal bayar di sel tabel yang sempit (grid iuran) */
+export function formatTanggalPendek(value: string | null | undefined): string {
+  const parsed = parseDate(value);
+  if (!parsed) return "—";
+  return parsed.d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    timeZone: parsed.timeZone,
+  });
+}
+
 /** Februari 2026 — untuk kolom periode_bulan */
 export function formatPeriode(value: string | null | undefined): string {
   const parsed = parseDate(value);
