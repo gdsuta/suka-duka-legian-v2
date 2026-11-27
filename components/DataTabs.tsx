@@ -2,8 +2,10 @@
 import { useDeferredValue, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Inbox, Search, X } from "lucide-react";
 import GridDenda from "@/components/GridDenda";
+import Badge, { TONE_KATEGORI_PENGELUARAN } from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
 import { inputClass } from "@/components/ui/Field";
+import { TANPA_KATEGORI } from "@/lib/config";
 import { susunGridDenda } from "@/lib/denda";
 import { formatPeriode, formatRupiah, formatTanggal } from "@/lib/format";
 import type { Anggota, PemasukanDenganNama, Pengeluaran } from "@/lib/types";
@@ -115,6 +117,13 @@ export default function DataTabs({
         rows: pengeluaran,
         columns: [
           { header: "Item / Keperluan", cell: (r: Pengeluaran) => r.item_barang, primary: true, className: "font-medium text-ink" },
+          {
+            header: "Kategori",
+            cell: (r: Pengeluaran) => {
+              const k = r.kategori ?? TANPA_KATEGORI;
+              return <Badge tone={TONE_KATEGORI_PENGELUARAN[k] ?? "neutral"}>{k}</Badge>;
+            },
+          },
           { header: "Tanggal", cell: (r: Pengeluaran) => formatTanggal(r.tanggal), className: "text-ink-muted" },
           {
             header: "Volume",
@@ -124,7 +133,7 @@ export default function DataTabs({
           },
           { header: "Total", cell: (r: Pengeluaran) => <Nominal value={r.total_biaya} tone="expense" />, align: "right" },
         ],
-        search: (r: Pengeluaran) => `${r.item_barang} ${r.vendor ?? ""} ${r.pembeli ?? ""}`,
+        search: (r: Pengeluaran) => `${r.item_barang} ${r.kategori ?? TANPA_KATEGORI} ${r.vendor ?? ""} ${r.pembeli ?? ""}`,
         total: (rs: Pengeluaran[]) => rs.reduce((s, r) => s + r.total_biaya, 0),
         totalTone: "expense",
         empty: "Belum ada data pengeluaran.",

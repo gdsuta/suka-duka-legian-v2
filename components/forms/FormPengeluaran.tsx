@@ -4,15 +4,18 @@ import { Minus, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import ChipGroup from "@/components/ui/ChipGroup";
 import Field, { describedBy, inputClass } from "@/components/ui/Field";
 import InputRupiah from "@/components/ui/InputRupiah";
 import { catatPengeluaran } from "@/lib/actions/keuangan";
+import { KATEGORI_PENGELUARAN, type KategoriPengeluaran } from "@/lib/config";
 import { formatRupiah, hariIni } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
 type Errors = Record<string, string[] | undefined>;
 
 export default function FormPengeluaran({ saranPembeli }: { saranPembeli: string[] }) {
+  const [kategori, setKategori] = useState<KategoriPengeluaran | "">("");
   const [item, setItem] = useState("");
   const [tanggal, setTanggal] = useState(hariIni());
   const [vendor, setVendor] = useState("");
@@ -30,6 +33,7 @@ export default function FormPengeluaran({ saranPembeli }: { saranPembeli: string
     setErrors({});
     startTransition(async () => {
       const res = await catatPengeluaran({
+        kategori: kategori || undefined,
         item_barang: item,
         tanggal,
         vendor,
@@ -42,7 +46,8 @@ export default function FormPengeluaran({ saranPembeli }: { saranPembeli: string
         toast.error(res.message);
         return;
       }
-      toast.success(res.message, { description: `${item} · ${formatRupiah(total)}` });
+      toast.success(res.message, { description: `${kategori} · ${item} · ${formatRupiah(total)}` });
+      // Kategori dipertahankan: belanja satu kegiatan biasanya dicatat beruntun
       setItem("");
       setVendor("");
       setHarga("");
@@ -53,6 +58,25 @@ export default function FormPengeluaran({ saranPembeli }: { saranPembeli: string
   return (
     <Card className="max-w-2xl p-5 sm:p-7">
       <form onSubmit={submit} className="space-y-5" noValidate>
+        <div>
+          <ChipGroup
+            name="kategori"
+            legend="Kategori"
+            required
+            options={KATEGORI_PENGELUARAN.map((k) => ({ value: k, label: k }))}
+            value={kategori}
+            onChange={(k) => {
+              setKategori(k);
+              setErrors((e) => ({ ...e, kategori: undefined }));
+            }}
+          />
+          {err("kategori") && (
+            <p id="kategori-error" role="alert" className="mt-1.5 text-sm font-medium text-expense">
+              {err("kategori")}
+            </p>
+          )}
+        </div>
+
         <Field label="Nama Item / Keperluan" htmlFor="item_barang" required error={err("item_barang")}>
           <input
             id="item_barang"

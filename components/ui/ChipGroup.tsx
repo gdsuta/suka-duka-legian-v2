@@ -13,7 +13,8 @@ export default function ChipGroup<T extends string>({
   name: string;
   legend: string;
   options: readonly { value: T; label: string }[];
-  value: T;
+  /** "" = belum ada yang dipilih */
+  value: T | "";
   onChange: (v: T) => void;
   required?: boolean;
 }) {

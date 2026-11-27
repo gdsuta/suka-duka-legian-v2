@@ -42,3 +42,14 @@ export const TONE_KATEGORI: Record<string, Tone> = {
   "Denda Gotong-Royong": "expense",
   "Donasi Sukarela": "violet",
 };
+
+export const TONE_KATEGORI_PENGELUARAN: Record<string, Tone> = {
+  "Penerangan Jalan": "gold",
+  "Kebersihan Lingkungan": "brand",
+  "Fasilitas Umum": "sky",
+  Konsumsi: "violet",
+  "Acara & Perayaan": "expense",
+  "Sosial & Duka": "neutral",
+  "Administrasi & Lainnya": "neutral",
+  "Belum dikategorikan": "neutral",
+};

@@ -2,13 +2,13 @@
 import { useDeferredValue, useState } from "react";
 import { Inbox, Search, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
-import Badge, { TONE_KATEGORI } from "@/components/ui/Badge";
+import Badge, { TONE_KATEGORI, TONE_KATEGORI_PENGELUARAN } from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
 import { inputClass, selectClass } from "@/components/ui/Field";
 import { hapusTransaksi } from "@/lib/actions/keuangan";
-import { KATEGORI_PEMASUKAN } from "@/lib/config";
+import { KATEGORI_PEMASUKAN, KATEGORI_PENGELUARAN, TANPA_KATEGORI } from "@/lib/config";
 import { formatPeriode, formatRupiah, formatTanggal } from "@/lib/format";
 import type { PemasukanDenganNama, Pengeluaran } from "@/lib/types";
 import { cn } from "@/lib/cn";
@@ -37,8 +37,16 @@ export default function RiwayatTransaksi({
       (!q || `${p.nama_anggota ?? ""} ${p.kategori}`.toLowerCase().includes(q))
   );
   const keluar = pengeluaran.filter(
-    (k) => !q || `${k.item_barang} ${k.vendor ?? ""} ${k.pembeli ?? ""}`.toLowerCase().includes(q)
+    (k) =>
+      (!kategori || (k.kategori ?? TANPA_KATEGORI) === kategori) &&
+      (!q || `${k.item_barang} ${k.vendor ?? ""} ${k.pembeli ?? ""}`.toLowerCase().includes(q))
   );
+  const pilihanKategori: readonly string[] =
+    jenis === "pemasukan"
+      ? KATEGORI_PEMASUKAN
+      : pengeluaran.some((k) => !k.kategori)
+        ? [...KATEGORI_PENGELUARAN, TANPA_KATEGORI]
+        : KATEGORI_PENGELUARAN;
   const jumlahHasil = jenis === "pemasukan" ? masuk.length : keluar.length;
   const total =
     jenis === "pemasukan" ? masuk.reduce((s, p) => s + p.jumlah, 0) : keluar.reduce((s, k) => s + k.total_biaya, 0);
@@ -63,6 +71,7 @@ export default function RiwayatTransaksi({
 
   const gantiJenis = (j: Jenis) => {
     setJenis(j);
+    setKategori("");
     setLimit(HALAMAN);
   };
 
@@ -95,24 +104,22 @@ export default function RiwayatTransaksi({
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">
-          {jenis === "pemasukan" && (
-            <select
-              value={kategori}
-              onChange={(e) => {
-                setKategori(e.target.value);
-                setLimit(HALAMAN);
-              }}
-              aria-label="Filter kategori"
-              className={cn(selectClass, "h-11 sm:w-56")}
-            >
-              <option value="">Semua kategori</option>
-              {KATEGORI_PEMASUKAN.map((k) => (
-                <option key={k} value={k}>
-                  {k}
-                </option>
-              ))}
-            </select>
-          )}
+          <select
+            value={kategori}
+            onChange={(e) => {
+              setKategori(e.target.value);
+              setLimit(HALAMAN);
+            }}
+            aria-label="Filter kategori"
+            className={cn(selectClass, "h-11 sm:w-56")}
+          >
+            <option value="">Semua kategori</option>
+            {pilihanKategori.map((k) => (
+              <option key={k} value={k}>
+                {k}
+              </option>
+            ))}
+          </select>
           <div className="relative sm:w-64">
             <Search className="pointer-events-none absolute top-1/2 left-3.5 size-[1.125rem] -translate-y-1/2 text-ink-faint" aria-hidden />
             <input
@@ -196,11 +203,16 @@ export default function RiwayatTransaksi({
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium text-ink">{k.item_barang}</p>
-                      <p className="mt-0.5 truncate text-sm text-ink-faint">
-                        {formatTanggal(k.tanggal)}
-                        {k.vendor && ` · ${k.vendor}`}
-                        {k.pembeli && ` · oleh ${k.pembeli}`}
-                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-faint">
+                        <Badge tone={TONE_KATEGORI_PENGELUARAN[k.kategori ?? TANPA_KATEGORI] ?? "neutral"}>
+                          {k.kategori ?? TANPA_KATEGORI}
+                        </Badge>
+                        <span className="min-w-0 truncate">
+                          {formatTanggal(k.tanggal)}
+                          {k.vendor && ` · ${k.vendor}`}
+                          {k.pembeli && ` · oleh ${k.pembeli}`}
+                        </span>
+                      </div>
                     </div>
                     <span className="num shrink-0 text-[0.9375rem] font-semibold text-expense">
                       {formatRupiah(k.total_biaya)}
