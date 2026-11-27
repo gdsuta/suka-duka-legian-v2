@@ -1,4 +1,5 @@
 "use client";
+import { useLayoutEffect, useRef } from "react";
 import { Inbox, Search } from "lucide-react";
 import { toast } from "sonner";
 import EmptyState from "@/components/ui/EmptyState";
@@ -12,6 +13,13 @@ function keterangan(nama: string, tanggal: string, sel: SelDenda) {
 
 /** Tabel anggota × tanggal kerja bakti: sel terisi = denda sudah tercatat dibayar. */
 export default function GridDenda({ grid, query }: { grid: Grid; query: string }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Kerja bakti terbaru ada di kanan; geser ke ujung kanan agar langsung terlihat di layar ponsel
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [grid.kolom.length, query]);
+
   if (grid.kolom.length === 0) {
     return <EmptyState icon={Inbox} title="Belum ada data" description="Belum ada denda tercatat." />;
   }
@@ -28,7 +36,7 @@ export default function GridDenda({ grid, query }: { grid: Grid; query: string }
       {baris.length === 0 ? (
         <EmptyState icon={Search} title="Tidak ada yang cocok" description={`Tidak ditemukan hasil untuk "${query}".`} />
       ) : (
-        <div className="overflow-x-auto">
+        <div ref={scrollRef} className="overflow-x-auto">
           <table className="w-full border-separate border-spacing-0 text-left text-[0.9375rem]">
             <caption className="sr-only">Pembayaran denda kerja bakti per anggota</caption>
             <thead>

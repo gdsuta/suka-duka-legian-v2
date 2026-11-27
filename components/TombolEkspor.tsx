@@ -228,7 +228,7 @@ export default function TombolEkspor(props: Props) {
             [
               "",
               "Jumlah bayar",
-              ...grid.kolom.map((k) => `${k.jumlahPembayar} org · ${formatRupiahRingkas(k.total)}`),
+              ...grid.kolom.map((k) => `${k.jumlahPembayar} org · ${formatRupiah(k.total)}`),
             ],
           ],
           theme: "grid",

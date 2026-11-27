@@ -20,13 +20,16 @@ export function formatRupiahSingkat(n: number): string {
   return `Rp ${n}`;
 }
 
-/** 25rb · 1,25jt — untuk sel tabel yang sempit (grid denda) */
+/**
+ * 25rb · 1,25jt — untuk sel tabel yang sempit (grid denda).
+ * Tidak pernah membulatkan: bila bentuk singkat tidak persis, tampilkan nominal lengkap.
+ */
 export function formatRupiahRingkas(n: number): string {
   const abs = Math.abs(n);
-  if (abs >= 1_000_000) {
+  if (abs >= 1_000_000 && n % 10_000 === 0) {
     return `${(n / 1_000_000).toLocaleString("id-ID", { maximumFractionDigits: 2 })}jt`;
   }
-  if (abs >= 1_000) {
+  if (abs >= 1_000 && abs < 1_000_000 && n % 100 === 0) {
     return `${(n / 1_000).toLocaleString("id-ID", { maximumFractionDigits: 1 })}rb`;
   }
   return formatRupiah(n);
