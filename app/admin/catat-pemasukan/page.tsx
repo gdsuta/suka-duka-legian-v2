@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PageHeader from "@/components/ui/PageHeader";
+import ModeCatat from "@/components/ui/ModeCatat";
 import FormPemasukan from "@/components/forms/FormPemasukan";
 import { getAnggota, getPemasukan } from "@/lib/queries";
 import type { KategoriPemasukan } from "@/lib/config";
@@ -45,6 +46,7 @@ export default async function CatatPemasukanPage() {
   return (
     <>
       <PageHeader title="Catat Pemasukan" description="Iuran, sumbangan, donasi, atau denda dari anggota." />
+      <ModeCatat aktif="satu" />
       <FormPemasukan
         anggota={anggota.map(({ id, nama_lengkap }) => ({ id, nama_lengkap }))}
         nominalUmum={nominalUmum}

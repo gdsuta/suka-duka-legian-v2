@@ -1,4 +1,4 @@
-import { History, TrendingDown, TrendingUp, UserPlus } from "lucide-react";
+import { History, TrendingDown, TrendingUp, UserPlus, CalendarCheck } from "lucide-react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import Card, { CardHeader } from "@/components/ui/Card";
@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 
 const AKSI: { href: string; label: string; desc: string; icon: LucideIcon; tone: string }[] = [
   { href: "/admin/catat-pemasukan", label: "Catat Pemasukan", desc: "Iuran, sumbangan, denda", icon: TrendingUp, tone: "bg-income-soft text-income" },
+  { href: "/admin/catat-iuran", label: "Iuran Sekaligus", desc: "Salin buku catatan iuran", icon: CalendarCheck, tone: "bg-brand-soft text-brand" },
   { href: "/admin/catat-pengeluaran", label: "Catat Pengeluaran", desc: "Belanja & biaya operasional", icon: TrendingDown, tone: "bg-expense-soft text-expense" },
   { href: "/admin/tambah-anggota", label: "Tambah Anggota", desc: "Daftarkan warga baru", icon: UserPlus, tone: "bg-sky-soft text-sky" },
   { href: "/admin/riwayat-transaksi", label: "Riwayat", desc: "Lihat & hapus transaksi", icon: History, tone: "bg-gold-soft text-gold" },
@@ -28,7 +29,7 @@ export default function PanelAdmin({
   return (
     <Card>
       <CardHeader title="Aksi Cepat" description="Pencatatan & laporan untuk admin" />
-      <div className="grid grid-cols-2 gap-2 px-5 pt-4 sm:px-6 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 px-5 pt-4 sm:px-6 lg:grid-cols-5">
         {AKSI.map(({ href, label, desc, icon: Icon, tone }) => (
           <Link
             key={href}
