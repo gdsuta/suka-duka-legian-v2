@@ -41,7 +41,8 @@ export async function getPengeluaran(): Promise<Pengeluaran[]> {
             harga_satuan::float8 AS harga_satuan,
             volume,
             total_biaya::float8 AS total_biaya,
-            pembeli
+            pembeli,
+            kategori
      FROM pengeluaran
      ORDER BY tanggal DESC NULLS LAST, item_barang ASC`
   )) as Pengeluaran[];

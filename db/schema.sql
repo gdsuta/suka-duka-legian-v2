@@ -31,6 +31,9 @@ CREATE TABLE IF NOT EXISTS pengeluaran (
   total_biaya  numeric NOT NULL CHECK (total_biaya > 0),
   pembeli      text
 );
+-- Kategori keperluan (lib/config.ts → KATEGORI_PENGELUARAN). Ditambahkan 2026-11;
+-- `npm run db:backfill-kategori` mengisi data lama lalu menjadikannya NOT NULL.
+ALTER TABLE pengeluaran ADD COLUMN IF NOT EXISTS kategori text;
 
 -- Akun admin (login email + password, hash scrypt)
 CREATE TABLE IF NOT EXISTS admin_users (

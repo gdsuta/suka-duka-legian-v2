@@ -1,4 +1,4 @@
-import type { KategoriPemasukan } from "@/lib/config";
+import type { KategoriPemasukan, KategoriPengeluaran } from "@/lib/config";
 
 export interface Anggota {
   id: string;
@@ -29,6 +29,8 @@ export interface Pengeluaran {
   volume: number | null;
   total_biaya: number;
   pembeli: string | null;
+  /** null = data lama yang belum dikategorikan */
+  kategori: KategoriPengeluaran | null;
 }
 
 /** Hasil standar Server Action untuk form. */

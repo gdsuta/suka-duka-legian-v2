@@ -24,3 +24,30 @@ export const WARNA_KATEGORI: Record<KategoriPemasukan, string> = {
   "Denda Gotong-Royong": "bg-expense",
   "Donasi Sukarela": "bg-violet",
 };
+
+// Kategori pengeluaran — dipilih saat mencatat; dipakai untuk ringkasan "ke mana uang dipakai"
+export const KATEGORI_PENGELUARAN = [
+  "Penerangan Jalan",
+  "Kebersihan Lingkungan",
+  "Fasilitas Umum",
+  "Konsumsi",
+  "Acara & Perayaan",
+  "Sosial & Duka",
+  "Administrasi & Lainnya",
+] as const;
+
+export type KategoriPengeluaran = (typeof KATEGORI_PENGELUARAN)[number];
+
+/** Label untuk pengeluaran yang belum punya kategori */
+export const TANPA_KATEGORI = "Belum dikategorikan";
+
+export const WARNA_KATEGORI_PENGELUARAN: Record<KategoriPengeluaran | typeof TANPA_KATEGORI, string> = {
+  "Penerangan Jalan": "bg-gold",
+  "Kebersihan Lingkungan": "bg-brand",
+  "Fasilitas Umum": "bg-sky",
+  Konsumsi: "bg-violet",
+  "Acara & Perayaan": "bg-expense",
+  "Sosial & Duka": "bg-ink-muted",
+  "Administrasi & Lainnya": "bg-ink-faint",
+  [TANPA_KATEGORI]: "bg-border-strong",
+};

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { KATEGORI_PEMASUKAN, KATEGORI_BERPERIODE } from "@/lib/config";
+import { KATEGORI_PEMASUKAN, KATEGORI_BERPERIODE, KATEGORI_PENGELUARAN } from "@/lib/config";
 
 const tanggalValid = z
   .string()
@@ -40,6 +40,7 @@ export const PemasukanSchema = z
   }));
 
 export const PengeluaranSchema = z.object({
+  kategori: z.enum(KATEGORI_PENGELUARAN, { errorMap: () => ({ message: "Pilih kategori pengeluaran" }) }),
   item_barang: z.string().trim().min(1, "Nama item wajib diisi").max(200),
   tanggal: tanggalValid,
   vendor: z.string().trim().max(200).optional(),

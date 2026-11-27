@@ -52,14 +52,14 @@ export async function catatPengeluaran(input: unknown): Promise<ActionResult> {
     };
   }
 
-  const { item_barang, tanggal, vendor, harga_satuan, volume, pembeli } = parsed.data;
+  const { kategori, item_barang, tanggal, vendor, harga_satuan, volume, pembeli } = parsed.data;
   // Total dihitung di server — jangan percaya angka dari browser
   const total_biaya = harga_satuan * volume;
 
   try {
     await db()`
-      INSERT INTO pengeluaran (item_barang, tanggal, vendor, harga_satuan, volume, total_biaya, pembeli)
-      VALUES (${item_barang}, ${tanggal}, ${vendor || null}, ${harga_satuan}, ${volume}, ${total_biaya}, ${pembeli})`;
+      INSERT INTO pengeluaran (kategori, item_barang, tanggal, vendor, harga_satuan, volume, total_biaya, pembeli)
+      VALUES (${kategori}, ${item_barang}, ${tanggal}, ${vendor || null}, ${harga_satuan}, ${volume}, ${total_biaya}, ${pembeli})`;
   } catch (err) {
     return gagal(err);
   }
