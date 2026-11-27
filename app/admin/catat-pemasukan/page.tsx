@@ -30,6 +30,18 @@ export default async function CatatPemasukanPage() {
     .filter((p) => p.kategori === "Iuran Bulanan" && p.anggota_id && p.periode_bulan)
     .map((p) => `${p.anggota_id}|${p.periode_bulan!.slice(0, 7)}`);
 
+  // Tanggal kerja bakti yang sudah tercatat — pintasan agar denda susulan masuk ke tanggal yang sama
+  const tanggalKerjaBakti = [
+    ...new Set(
+      pemasukan
+        .filter((p) => p.kategori === "Denda Gotong-Royong" && p.periode_bulan)
+        .map((p) => p.periode_bulan!.slice(0, 10))
+    ),
+  ]
+    .sort()
+    .reverse()
+    .slice(0, 4);
+
   return (
     <>
       <PageHeader title="Catat Pemasukan" description="Iuran, sumbangan, donasi, atau denda dari anggota." />
@@ -37,6 +49,7 @@ export default async function CatatPemasukanPage() {
         anggota={anggota.map(({ id, nama_lengkap }) => ({ id, nama_lengkap }))}
         nominalUmum={nominalUmum}
         iuranTercatat={iuranTercatat}
+        tanggalKerjaBakti={tanggalKerjaBakti}
       />
     </>
   );

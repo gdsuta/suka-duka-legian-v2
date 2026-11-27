@@ -9,7 +9,7 @@ import Field, { describedBy, inputClass, selectClass } from "@/components/ui/Fie
 import InputRupiah from "@/components/ui/InputRupiah";
 import { catatPemasukan } from "@/lib/actions/keuangan";
 import { KATEGORI_PEMASUKAN, type KategoriPemasukan } from "@/lib/config";
-import { bulanIni, formatPeriode, formatRupiah, hariIni } from "@/lib/format";
+import { bulanIni, formatPeriode, formatRupiah, formatTanggal, hariIni } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
 type Errors = Record<string, string[] | undefined>;
@@ -24,9 +24,11 @@ interface Props {
   nominalUmum: Partial<Record<KategoriPemasukan, number[]>>;
   /** "anggotaId|YYYY-MM" untuk Iuran Bulanan yang sudah tercatat */
   iuranTercatat: string[];
+  /** Tanggal kerja bakti yang sudah punya catatan denda, terbaru dulu (YYYY-MM-DD) */
+  tanggalKerjaBakti: string[];
 }
 
-export default function FormPemasukan({ anggota, nominalUmum, iuranTercatat }: Props) {
+export default function FormPemasukan({ anggota, nominalUmum, iuranTercatat, tanggalKerjaBakti }: Props) {
   const [anggotaId, setAnggotaId] = useState("");
   const [kategori, setKategori] = useState<KategoriPemasukan>("Iuran Bulanan");
   const [jumlah, setJumlah] = useState("");
@@ -161,11 +163,11 @@ export default function FormPemasukan({ anggota, nominalUmum, iuranTercatat }: P
 
           {kategori === "Denda Gotong-Royong" && (
             <Field
-              label="Tanggal Gotong-Royong"
+              label="Tanggal Kerja Bakti"
               htmlFor="tanggal_denda"
               required
               error={err("periode_bulan")}
-              hint="Tanggal kegiatan yang tidak dihadiri."
+              hint="Tanggal kerja bakti yang tidak dihadiri — pilih tanggal yang sama untuk pembayaran susulan."
             >
               <input
                 id="tanggal_denda"
@@ -176,6 +178,31 @@ export default function FormPemasukan({ anggota, nominalUmum, iuranTercatat }: P
                 aria-describedby={describedBy("tanggal_denda", err("periode_bulan"), true)}
                 className={inputClass}
               />
+              {tanggalKerjaBakti.length > 0 && (
+                <div className="mt-1 flex flex-wrap items-center gap-x-1.5">
+                  <span className="text-xs text-ink-faint">Kerja bakti sebelumnya:</span>
+                  {tanggalKerjaBakti.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setTanggalDenda(t)}
+                      aria-pressed={tanggalDenda === t}
+                      className="group flex h-11 items-center"
+                    >
+                      <span
+                        className={cn(
+                          "num flex h-8 items-center rounded-full border px-3 text-xs font-semibold transition-colors",
+                          tanggalDenda === t
+                            ? "border-brand bg-brand-soft text-brand-dark"
+                            : "border-border-strong text-ink-muted group-hover:border-ink-faint/50 group-hover:text-ink"
+                        )}
+                      >
+                        {formatTanggal(t)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </Field>
           )}
 

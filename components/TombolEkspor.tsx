@@ -3,7 +3,8 @@ import { useState } from "react";
 import { FileSpreadsheet, FileText } from "lucide-react";
 import { toast } from "sonner";
 import Button from "@/components/ui/Button";
-import { formatRupiah, formatTanggal } from "@/lib/format";
+import { susunGridDenda } from "@/lib/denda";
+import { formatRupiah, formatRupiahRingkas, formatTanggal } from "@/lib/format";
 import type { Anggota, Pemasukan, Pengeluaran } from "@/lib/types";
 
 interface Props {
@@ -139,25 +140,23 @@ export default function TombolEkspor(props: Props) {
         );
         const wajib = jumlahKat(trx, "Sumbangan Wajib");
         const donasi = jumlahKat(trx, "Donasi Sukarela");
-        const denda = jumlahKat(trx, "Denda Gotong-Royong");
         return [
           i + 1,
           orang.nama_lengkap,
           lunas ? "Lunas" : "Belum Bayar",
           wajib > 0 ? formatRupiah(wajib) : "-",
           donasi > 0 ? formatRupiah(donasi) : "-",
-          denda > 0 ? formatRupiah(denda) : "-",
         ];
       });
 
       autoTable(doc, {
         startY: 38,
-        head: [["No", "Nama Warga", `Iuran ${bulanIni}`, "Sumbangan Wajib", "Donasi Sukarela", "Denda"]],
+        head: [["No", "Nama Warga", `Iuran ${bulanIni}`, "Sumbangan Wajib", "Donasi Sukarela"]],
         body,
         theme: "grid",
         headStyles: { fillColor: JADE },
         styles: { fontSize: 9.5 },
-        columnStyles: { 0: { cellWidth: 12 }, 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" } },
+        columnStyles: { 0: { cellWidth: 12 }, 3: { halign: "right" }, 4: { halign: "right" } },
         didParseCell: (d) => {
           if (d.section !== "body") return;
           if (d.cell.raw === "Belum Bayar") {
@@ -169,6 +168,57 @@ export default function TombolEkspor(props: Props) {
           }
         },
       });
+
+      // Denda per kerja bakti: dikelompokkan menurut tanggal kegiatan, bukan tanggal bayar
+      const grid = susunGridDenda(anggota, pemasukan, { kolomTerakhir: 6 });
+      let y = (doc as any).lastAutoTable.finalY + 12;
+      if (y > 170) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text(grid.kolom.length < 6 ? "Denda Kerja Bakti" : "Denda Kerja Bakti (6 kegiatan terakhir)", 14, y);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(90);
+      doc.text("Angka = denda yang sudah dibayar untuk kerja bakti tanggal tersebut (termasuk pembayaran susulan).", 14, y + 5);
+      doc.setTextColor(0);
+
+      if (grid.kolom.length === 0) {
+        doc.setFontSize(10);
+        doc.text("Belum ada denda tercatat.", 14, y + 13);
+      } else {
+        autoTable(doc, {
+          startY: y + 9,
+          head: [["No", "Nama Warga", ...grid.kolom.map((k) => formatTanggal(k.tanggal))]],
+          body: grid.baris.map((b, i) => [
+            i + 1,
+            b.nama,
+            ...grid.kolom.map((k) => (b.sel[k.tanggal] ? formatRupiahRingkas(b.sel[k.tanggal].jumlah) : "-")),
+          ]),
+          foot: [
+            [
+              "",
+              "Jumlah bayar",
+              ...grid.kolom.map((k) => `${k.jumlahPembayar} org · ${formatRupiahRingkas(k.total)}`),
+            ],
+          ],
+          theme: "grid",
+          headStyles: { fillColor: JADE, halign: "center" },
+          footStyles: { fillColor: [245, 247, 249], textColor: 20, halign: "center" },
+          styles: { fontSize: 9 },
+          columnStyles: { 0: { cellWidth: 12 }, 1: { cellWidth: 70 } },
+          didParseCell: (d) => {
+            if (d.section !== "body" || d.column.index < 2) return;
+            d.cell.styles.halign = "center";
+            if (d.cell.raw !== "-") {
+              d.cell.styles.textColor = JADE;
+              d.cell.styles.fontStyle = "bold";
+            }
+          },
+        });
+      }
 
       doc.save("Laporan_Detail_Pembayaran_Warga.pdf");
     });
