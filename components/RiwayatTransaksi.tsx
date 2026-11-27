@@ -176,7 +176,7 @@ export default function RiwayatTransaksi({
                             {p.kategori === "Iuran Bulanan" ? formatPeriode(p.periode_bulan) : formatTanggal(p.periode_bulan)}
                           </span>
                         )}
-                        <span className="hidden sm:inline">· dicatat {formatTanggal(p.tanggal_bayar)}</span>
+                        <span className="hidden sm:inline">· dibayar {formatTanggal(p.tanggal_bayar)}</span>
                       </div>
                     </div>
                     <span className="num shrink-0 text-[0.9375rem] font-semibold text-income">

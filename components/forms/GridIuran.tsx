@@ -242,7 +242,7 @@ export default function GridIuran({
                             type="button"
                             onClick={() =>
                               toast(baris.nama, {
-                                description: `${periode} · ${formatRupiah(ada.jumlah)} · dicatat ${formatTanggal(ada.tanggalBayar)}`,
+                                description: `${periode} · ${formatRupiah(ada.jumlah)} · dibayar ${formatTanggal(ada.tanggalBayar)}`,
                               })
                             }
                             aria-label={`${baris.nama}, ${periode}: sudah tercatat ${formatRupiah(ada.jumlah)}`}
