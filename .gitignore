@@ -17,3 +17,6 @@ public/swe-worker-*.js
 
 # Cache TypeScript
 *.tsbuildinfo
+
+# Berkas kerja lokal (mockup, catatan rencana)
+.superpowers/
