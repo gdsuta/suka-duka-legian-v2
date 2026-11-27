@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import AppHeader from "@/components/AppHeader";
 import AdminNav from "@/components/AdminNav";
+import TombolKeAtas from "@/components/TombolKeAtas";
 import { getSession } from "@/lib/auth";
 import { cn } from "@/lib/cn";
 import "./globals.css";
@@ -67,6 +68,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         </footer>
 
         {isAdmin && <AdminNav variant="bottom" />}
+
+        <TombolKeAtas isAdmin={isAdmin} />
 
         <Toaster
           position="top-center"
