@@ -37,3 +37,8 @@ export interface Pengeluaran {
 export type ActionResult =
   | { ok: true; message: string }
   | { ok: false; message: string; fieldErrors?: Record<string, string[] | undefined> };
+
+/** Hasil Server Action catatIuranSekaligus */
+export type IuranSekaligusResult =
+  | { ok: true; message: string; disimpan: number; dilewati: { nama: string; bulan: string }[] }
+  | { ok: false; message: string; fieldErrors?: Record<string, string[] | undefined> };

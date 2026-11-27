@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { KATEGORI_PEMASUKAN, KATEGORI_BERPERIODE, KATEGORI_PENGELUARAN } from "@/lib/config";
+import { hariIni } from "@/lib/format";
 
 const tanggalValid = z
   .string()
@@ -64,6 +65,37 @@ export const LoginSchema = z.object({
 
 export const IdSchema = z.string().uuid();
 
+/** Catat Iuran Sekaligus: banyak anggota × bulan dalam satu simpan */
+export const IuranSekaligusSchema = z.object({
+  jumlah: z
+    .number({ invalid_type_error: "Jumlah harus berupa angka", required_error: "Jumlah wajib diisi" })
+    .positive("Jumlah harus lebih dari 0")
+    .max(1_000_000_000, "Jumlah terlalu besar"),
+  // Bandingkan sebagai string YYYY-MM-DD dengan hari ini di WITA (bukan jam server UTC)
+  tanggal_diterima: tanggalValid.refine((t) => t <= hariIni(), {
+    message: "Tanggal diterima tidak boleh di masa depan",
+  }),
+  entri: z
+    .array(
+      z.object({
+        anggota_id: z.string().uuid("Anggota tidak valid"),
+        bulan: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Bulan tidak valid"),
+      })
+    )
+    .min(1, "Centang minimal satu bulan")
+    .max(600, "Terlalu banyak dalam satu kali simpan (maks. 600 bulan)")
+    .transform((entri) => {
+      const lihat = new Set<string>();
+      return entri.filter((e) => {
+        const k = `${e.anggota_id}|${e.bulan}`;
+        if (lihat.has(k)) return false;
+        lihat.add(k);
+        return true;
+      });
+    }),
+});
+
 export type PemasukanInput = z.input<typeof PemasukanSchema>;
 export type PengeluaranInput = z.infer<typeof PengeluaranSchema>;
 export type AnggotaInput = z.infer<typeof AnggotaSchema>;
+export type IuranSekaligusInput = z.infer<typeof IuranSekaligusSchema>;

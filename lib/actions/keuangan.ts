@@ -2,8 +2,11 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
-import { IdSchema, PemasukanSchema, PengeluaranSchema } from "@/lib/schemas";
-import type { ActionResult } from "@/lib/types";
+import { formatPeriode, formatRupiah } from "@/lib/format";
+import { tanggalBayarWita } from "@/lib/iuran";
+import { sqlIuranSekaligus } from "@/lib/iuran-sql";
+import { IdSchema, IuranSekaligusSchema, PemasukanSchema, PengeluaranSchema } from "@/lib/schemas";
+import type { ActionResult, IuranSekaligusResult } from "@/lib/types";
 
 function segarkan() {
   revalidatePath("/", "layout");
@@ -91,4 +94,45 @@ export async function hapusTransaksi(
 
   segarkan();
   return { ok: true, message: "Data berhasil dihapus." };
+}
+
+export async function catatIuranSekaligus(input: unknown): Promise<IuranSekaligusResult> {
+  await requireAdmin();
+
+  const parsed = IuranSekaligusSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      message: "Mohon periksa isian kembali.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  const { jumlah, tanggal_diterima, entri } = parsed.data;
+  let rows: { bulan: string; nama: string | null; disimpan: boolean }[];
+  try {
+    rows = (await db().query(sqlIuranSekaligus(), [
+      JSON.stringify(entri),
+      jumlah,
+      tanggalBayarWita(tanggal_diterima),
+    ])) as typeof rows;
+  } catch (err) {
+    console.error(err);
+    const message = err instanceof Error ? err.message : "Terjadi kesalahan.";
+    return { ok: false, message: `Gagal menyimpan: ${message}` };
+  }
+
+  const disimpan = rows.filter((r) => r.disimpan).length;
+  const dilewati = rows
+    .filter((r) => !r.disimpan)
+    .map((r) => ({ nama: r.nama ?? "Anggota tidak ditemukan", bulan: formatPeriode(`${r.bulan}-01`) }))
+    .sort((a, b) => a.nama.localeCompare(b.nama, "id"));
+
+  if (disimpan > 0) segarkan();
+
+  const message =
+    disimpan === 0
+      ? "Tidak ada yang baru — semua sudah tercatat."
+      : `${disimpan} bulan tersimpan · ${formatRupiah(disimpan * jumlah)}`;
+  return { ok: true, message, disimpan, dilewati };
 }
