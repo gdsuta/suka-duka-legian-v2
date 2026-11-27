@@ -1,0 +1,242 @@
+[
+  {
+    "id": "295d55c8-6402-49f8-acee-d963b4d6110a",
+    "tanggal": "2026-02-08",
+    "item": "Beli Aqua",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "3f2eb1c3-d18e-46c2-97e7-1c81d6fd6ffb",
+    "tanggal": "2026-02-09",
+    "item": "Pembuatan Papan Nama Jalan",
+    "kategori": "Fasilitas Umum"
+  },
+  {
+    "id": "f3a691c1-79e0-47ca-95cd-2cef53312df8",
+    "tanggal": "2026-02-09",
+    "item": "Beli Karangan Bunga",
+    "kategori": "Sosial & Duka"
+  },
+  {
+    "id": "60d2a431-cdae-42c8-8da3-4a43dd334a94",
+    "tanggal": "2026-02-09",
+    "item": "Beli Lampu",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "f30b780f-8467-47e7-a8bc-d65f41bd987d",
+    "tanggal": "2026-02-09",
+    "item": "Beli Buku dan Pulpen",
+    "kategori": "Administrasi & Lainnya"
+  },
+  {
+    "id": "99a93391-1240-4440-8dd4-5a154aa28c14",
+    "tanggal": "2026-02-09",
+    "item": "Beli air minum dingin (Aqua)",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "b28552a3-9549-48e6-a67f-a27390c471b9",
+    "tanggal": "2026-02-09",
+    "item": "Ongkos Pasang Lampu 4 Titik",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "772a8c0d-4fba-4efe-bed5-1a3628ca8706",
+    "tanggal": "2026-02-09",
+    "item": "Belanja Alat-Alat Listrik",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "ed7918b6-8522-4470-863f-3673ce06c66f",
+    "tanggal": "2026-02-09",
+    "item": "Beli bahan bakar Pertalite",
+    "kategori": "Kebersihan Lingkungan"
+  },
+  {
+    "id": "ae1f94d3-b239-4cb6-98f3-2067bf443495",
+    "tanggal": "2026-03-08",
+    "item": "Beli lampu LED 40 w meval",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "bc6031a4-e439-4f52-85f2-d003a8d1224f",
+    "tanggal": "2026-03-08",
+    "item": "Box MCB",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "626e2c63-b8b1-4697-aaec-5610457be5eb",
+    "tanggal": "2026-03-08",
+    "item": "Lampu LED 20watt meval",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "ff4fc951-3cbb-40e8-8f1c-b679877f1b73",
+    "tanggal": "2026-03-08",
+    "item": "Kabel listrik twesled",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "92c8e378-6aaf-4cb9-9a4e-ed421db5f4d5",
+    "tanggal": "2026-03-08",
+    "item": "Isolasi",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "aa97e7c7-5aa1-437e-b070-192a1da900fd",
+    "tanggal": "2026-03-08",
+    "item": "Kabel NYM 2×1,5",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "916c1b71-ab92-4822-a970-8accd30c1f57",
+    "tanggal": "2026-03-08",
+    "item": "Fitting kap hijau besar",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "375d1c7f-779a-41af-8338-92f8cd0eb0ee",
+    "tanggal": "2026-03-08",
+    "item": "Pasang titik lampu baru",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "c25bac45-ffdf-48d0-bebf-00728e565f3a",
+    "tanggal": "2026-03-08",
+    "item": "Ongkos tukang pasang",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "5561a2b2-95a5-4fdd-9e3a-0d995002926d",
+    "tanggal": "2026-03-08",
+    "item": "Bensin potong rumput",
+    "kategori": "Kebersihan Lingkungan"
+  },
+  {
+    "id": "2998a995-3097-4952-8c76-c0850ec923f5",
+    "tanggal": "2026-03-08",
+    "item": "Beli lampu",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "5a463135-a6b0-40b4-bc3b-0f098ea06ee6",
+    "tanggal": "2026-03-21",
+    "item": "Beli alat potong rumput",
+    "kategori": "Kebersihan Lingkungan"
+  },
+  {
+    "id": "22d26935-4fe0-4c07-830b-2db44946209f",
+    "tanggal": "2026-05-03",
+    "item": "Bensin potong rumput",
+    "kategori": "Kebersihan Lingkungan"
+  },
+  {
+    "id": "819ac199-d903-445b-8be7-9d6df2b905e6",
+    "tanggal": "2026-05-03",
+    "item": "Aqua",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "5e0af117-f24a-4092-986a-9396a9e9202a",
+    "tanggal": "2026-06-02",
+    "item": "Beli lampu LED 6A masko",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "5668fb65-d3e2-4187-a61d-b844437acf4c",
+    "tanggal": "2026-06-02",
+    "item": "Beli lampu LED 20 watt",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "b7f45e90-1f19-4208-afea-096eab8fcdd1",
+    "tanggal": "2026-06-02",
+    "item": "Beli lampu LED 35 watt",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "8bf24949-93df-4b73-a018-036af300e3fc",
+    "tanggal": "2026-06-02",
+    "item": "Isolasi",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "b07026be-43d5-4ff6-bac8-04c68080ef46",
+    "tanggal": "2026-06-03",
+    "item": "Ongkos kerja",
+    "kategori": "Penerangan Jalan"
+  },
+  {
+    "id": "c2fe3b41-29c0-4687-b9a1-55e135ae499f",
+    "tanggal": "2026-06-14",
+    "item": "Aqua",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "4e9ce8b7-a2b0-4c11-9799-b40dbdb06968",
+    "tanggal": "2026-06-14",
+    "item": "Kue",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "c4501b95-f2f6-4eff-85f0-7972b353f1f3",
+    "tanggal": "2026-06-14",
+    "item": "Bensin",
+    "kategori": "Kebersihan Lingkungan"
+  },
+  {
+    "id": "480f8425-75da-484d-ac04-8556cdef8cab",
+    "tanggal": "2026-06-14",
+    "item": "Oli untuk mesin potong rumput",
+    "kategori": "Kebersihan Lingkungan"
+  },
+  {
+    "id": "2b10e1ab-c49b-4799-a3fd-a518769b3f45",
+    "tanggal": "2026-07-12",
+    "item": "Kue konsumsi",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "325912e4-f006-477c-b54a-f8247b9b28ce",
+    "tanggal": "2026-07-12",
+    "item": "Aqua",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "1bee15b9-874b-45c6-8c23-f2ff57799ecc",
+    "tanggal": "2026-07-20",
+    "item": "Pisau pemotongan rumput",
+    "kategori": "Kebersihan Lingkungan"
+  },
+  {
+    "id": "467b37e5-61e5-44ef-bc2e-5d0ba66a1e95",
+    "tanggal": "2026-08-16",
+    "item": "Kue",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "4606036b-0539-4f80-987e-b9683be37126",
+    "tanggal": "2026-08-16",
+    "item": "Perlengkapan HUT RI",
+    "kategori": "Acara & Perayaan"
+  },
+  {
+    "id": "bece0b82-8eb6-4165-bd38-64eb45c5d82f",
+    "tanggal": "2026-09-06",
+    "item": "Aqua",
+    "kategori": "Konsumsi"
+  },
+  {
+    "id": "c43ec758-6d4b-48b6-9bbd-32f73fb4a07c",
+    "tanggal": "2026-09-06",
+    "item": "Bensin untuk potong rumput",
+    "kategori": "Kebersihan Lingkungan"
+  },
+  {
+    "id": "851f217a-1ef1-407a-8b3d-1903e7e8becd",
+    "tanggal": "2026-09-06",
+    "item": "Snak",
+    "kategori": "Konsumsi"
+  }
+]
